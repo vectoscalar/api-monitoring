@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import dbModels from '../models'
 
+import { logger } from '../common/services';
+
 export namespace MongooseClient {
   export let connection: mongoose.Connection | null = null;
 
@@ -11,13 +13,13 @@ export namespace MongooseClient {
     try {
       await mongoose.connect(mongoUrl);
       connection = mongoose.connection;
-      console.info('Connected to MongoDB');
+      logger.info('Connected to MongoDB');
 
       // Initialize all models
       Object.values(dbModels).forEach(model => model.init());
 
     } catch (error) {
-      console.error('Unable to connect to MongoDB:', error);
+      logger.error('Unable to connect to MongoDB:', error);
       throw error;
     }
   }
@@ -33,7 +35,7 @@ export namespace MongooseClient {
     if (connection) {
       await connection.close();
       connection = null;
-      console.info('Disconnected from MongoDB');
+      logger.info('Disconnected from MongoDB');
     }
   }
 }

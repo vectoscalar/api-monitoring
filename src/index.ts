@@ -3,6 +3,8 @@ import fastifyPlugin from 'fastify-plugin';
 import { MongoClient, Db } from 'mongodb';
 import { MongooseClient } from './clients/mongoClient';
 
+import { logger } from './common/services';
+
 interface MongoPluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
 }
@@ -29,16 +31,16 @@ async function fastifyMongoDBPlugin(fastify: FastifyInstance, options: MongoPlug
 
     fastify.addHook('onRequest', async (request, reply) => {
       // Perform any necessary onRequest logic here
-      console.log('onRequest hook triggered');
+      logger.info('onRequest hook triggered');
     });
 
     fastify.addHook('onResponse', async (request, reply) => {
       // Perform any necessary onResponse logic here
-      console.log('onResponse hook triggered');
+      logger.info('onResponse hook triggered');
     });
 
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     throw new Error('Failed to connect to MongoDB');
   }
 }
