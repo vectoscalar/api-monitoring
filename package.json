@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
+    "mongoose": "^8.5.1"
+  },
+  "name": "api-monitoring",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
