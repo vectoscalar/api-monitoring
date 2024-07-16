@@ -1,8 +1,10 @@
+import mongoose from "mongoose";
 import BaseDAO from "../common/base.dao";
+
 import { OrganizationModel, IOrganization } from "../models/organization.model";
 
 export class OrganizationDAO extends BaseDAO {
-  protected readonly model;
+  protected readonly model : mongoose.Model<IOrganization>;
 
   constructor() {
     super(OrganizationModel); 
