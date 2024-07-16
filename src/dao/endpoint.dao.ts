@@ -9,6 +9,4 @@ export class EndpointDAO extends BaseDAO {
     super(EndpointModel);
     this.model = EndpointModel;
   }
-
-
 }
