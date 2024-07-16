@@ -5,7 +5,6 @@ export interface IEndpoint extends Document {
     url: string;
     version: string;
     method: string;
-    averageResponseTime: number;
     totalResponseTime: number;
     totalInvocationCount: number;
     description: string;
@@ -19,9 +18,8 @@ const endpointSchema = new Schema<IEndpoint>({
     url: { type: String, required: true },
     version: { type: String, required: true },
     method: { type: String, required: true },
-    averageResponseTime: { type: Number, default: 0 },
     totalResponseTime: { type: Number, default: 0 },
-    totalInvocation: { type: Number, default: 0 },
+    totalInvocationCount: { type: Number, default: 0 },
     description: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
