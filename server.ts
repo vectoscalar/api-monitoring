@@ -1,12 +1,14 @@
 import fastify from 'fastify';
 import { mongoDBPlugin } from './src/index'; // Import your plugin
+// import { mongoDBPlugin } from './src/index'; // Import your plugin
+import { metricMonitorPlugin } from 'my-fastify-plugin'; // Import your plugin
 
 const app = fastify();
 
 
-app.register(mongoDBPlugin, {
   mongoUrl: 'INSERT DB URL',
   organizationName: 'o2',
+app.register(metricMonitorPlugin, {
   projectName: 'p1',
   microserviceName: 'm1',
 });

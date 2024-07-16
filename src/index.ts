@@ -67,7 +67,7 @@ async function MetricMonitor(fastify: FastifyInstance, options: MongoPluginOptio
   }
 }
 
-export const mongoDBPlugin = fastifyPlugin(MetricMonitor);
+export const metricMonitorPlugin = fastifyPlugin(MetricMonitor);
 
 
 
