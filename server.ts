@@ -1,7 +1,6 @@
 import fastify from 'fastify';
-import { mongoDBPlugin } from './src/index'; // Import your plugin
-// import { mongoDBPlugin } from './src/index'; // Import your plugin
-import { metricMonitorPlugin } from 'my-fastify-plugin'; // Import your plugin
+import { apiMonitorPlugin } from './src/index'; // Import your plugin
+// import { apiMonitorPlugin } from 'my-fastify-plugin'; // Import your plugin
 
 const app = fastify();
 
