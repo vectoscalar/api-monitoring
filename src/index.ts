@@ -40,13 +40,13 @@ async function fastifyMongoDBPlugin(fastify: FastifyInstance, options: MongoPlug
     await MongooseClient.init(mongoUrl) 
 
     const org:any = await new OrganizationDAO().upsertOrganization(organizationName, gst);
-    logger.log('Organization created ', org)
+    logger.info('Organization created ', org)
 
     const project:any = await new ProjectDAO().upsertProject(org.id, projectName);
-    logger.log('Project created ', project)
+    logger.info('Project created ', project)
     
     const microservice = await new MicroserviceDAO().upsertMicroservice(project.id, microserviceName);
-    logger.log('Microservice created ', microservice)
+    logger.info('Microservice created ', microservice)
 
     fastify.addHook('onRequest', async (request, reply) => {
       // Perform any necessary onRequest logic here
