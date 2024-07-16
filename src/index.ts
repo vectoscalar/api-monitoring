@@ -27,24 +27,27 @@ declare module 'fastify' {
  * @param options 
  */
 async function fastifyMongoDBPlugin(fastify: FastifyInstance, options: MongoPluginOptions) {
-  
+
   const {
     mongoUrl,
     organizationName,
     projectName,
     microserviceName,
-    gst
+    gst,
+    logLevel
   } = options;
 
-  try {
-    await MongooseClient.init(mongoUrl) 
+  logger.init(logLevel)
 
-    const org:any = await new OrganizationDAO().upsertOrganization(organizationName, gst);
+  try {
+    await MongooseClient.init(mongoUrl)
+
+    const org: any = await new OrganizationDAO().upsertOrganization(organizationName, gst);
     logger.info('Organization created ', org)
 
-    const project:any = await new ProjectDAO().upsertProject(org.id, projectName);
+    const project: any = await new ProjectDAO().upsertProject(org.id, projectName);
     logger.info('Project created ', project)
-    
+
     const microservice = await new MicroserviceDAO().upsertMicroservice(project.id, microserviceName);
     logger.info('Microservice created ', microservice)
 
