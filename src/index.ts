@@ -26,7 +26,7 @@ declare module 'fastify' {
  * @param fastify 
  * @param options 
  */
-async function fastifyMongoDBPlugin(fastify: FastifyInstance, options: MongoPluginOptions) {
+async function MetricMonitor(fastify: FastifyInstance, options: MongoPluginOptions) {
 
   const {
     mongoUrl,
@@ -67,7 +67,7 @@ async function fastifyMongoDBPlugin(fastify: FastifyInstance, options: MongoPlug
   }
 }
 
-export const mongoDBPlugin = fastifyPlugin(fastifyMongoDBPlugin);
+export const mongoDBPlugin = fastifyPlugin(MetricMonitor);
 
 
 
