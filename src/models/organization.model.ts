@@ -11,7 +11,7 @@ export interface IOrganization extends Document {
   deletedAt?: Date | null;
 }
 
-const organizationSchema = new Schema({
+const organizationSchema = new Schema<IOrganization>({
   name: { type: String, required: true },
   city: { type: String },
   state: { type: String },
@@ -20,7 +20,8 @@ const organizationSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date, default: null }
+}, {
+  timestamps: true // Automatically adds createdAt and updatedAt fields
 });
 
 export const OrganizationModel = mongoose.model<IOrganization>('Organization', organizationSchema);
-
