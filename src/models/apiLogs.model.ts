@@ -7,8 +7,6 @@ export interface IAPILog extends Document {
     organizationId: mongoose.Types.ObjectId;
     timestamp: Date;
     responseTime: number;
-    requestBody: string;
-    responseBody: string;
     isSuccessfull: boolean;
     statusCode: number;
     errorMessage?: string;
@@ -23,8 +21,6 @@ const apiLogSchema = new Schema<IAPILog>({
     organizationId: { type: Schema.Types.ObjectId, required: true },
     timestamp: { type: Date, default: Date.now },
     responseTime: { type: Number, required: true },
-    requestBody: { type: String },
-    responseBody: { type: String },
     isSuccessfull: { type: Boolean, required: true },
     statusCode: { type: Number },
     errorMessage: { type: String },
