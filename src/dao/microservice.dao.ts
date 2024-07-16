@@ -3,7 +3,7 @@ import BaseDAO from "../common/base.dao";
 import { MicroserviceModel, IMicroservice } from "../models/microservice.model";
 
 export class MicroserviceDAO extends BaseDAO {
-  protected readonly model;
+  protected readonly model : mongoose.Model<IMicroservice>;
 
   constructor() {
     super(MicroserviceModel);

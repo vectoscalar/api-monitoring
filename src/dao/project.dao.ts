@@ -1,9 +1,9 @@
 import BaseDAO from "../common/base.dao";
-import mongoose, { Model } from "mongoose";
+import mongoose from "mongoose";
 import { ProjectModel, IProject } from "../models/project.model";
 
 export class ProjectDAO extends BaseDAO {
-  protected readonly model;
+  protected readonly model: mongoose.Model<IProject>;
 
   constructor() {
     super(ProjectModel);
