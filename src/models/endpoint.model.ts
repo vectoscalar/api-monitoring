@@ -7,7 +7,7 @@ export interface IEndpoint extends Document {
     method: string;
     averageResponseTime: number;
     totalResponseTime: number;
-    totalInvocation: number;
+    totalInvocationCount: number;
     description: string;
     createdAt: Date;
     updatedAt: Date;
