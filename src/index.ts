@@ -5,19 +5,15 @@ import { MongooseClient } from './clients/mongoClient';
 
 import { logger } from './common/services';
 
-import { ProjectDAO, OrganizationDAO, MicroserviceDAO } from './dao';
+import { UserAccountService } from './services'
 
-interface MongoPluginOptions extends FastifyPluginOptions {
+interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
-}
-
-declare module 'fastify' {
-  interface FastifyInstance {
-    mongo: MongoClient;
-  }
-  interface FastifyRequest {
-    mongo: MongoClient;
-  }
+  organizationName: string;
+  projectName: string;
+  microserviceName: string;
+  gst: string;
+  logLevel: string;
 }
 
 /**
@@ -26,7 +22,7 @@ declare module 'fastify' {
  * @param fastify 
  * @param options 
  */
-async function ApiMonitor(fastify: FastifyInstance, options: MongoPluginOptions) {
+async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
   const {
     mongoUrl,
@@ -42,14 +38,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: MongoPluginOptions)
   try {
     await MongooseClient.init(mongoUrl)
 
-    const org: any = await new OrganizationDAO().upsertOrganization(organizationName, gst);
-    logger.info('Organization created ', org)
-
-    const project: any = await new ProjectDAO().upsertProject(org.id, projectName);
-    logger.info('Project created ', project)
-
-    const microservice = await new MicroserviceDAO().upsertMicroservice(project.id, microserviceName);
-    logger.info('Microservice created ', microservice)
+    const { organizationId, projectId, microserviceId } = await new UserAccountService().setAccountInfo(organizationName, gst, projectName, microserviceName);
 
     fastify.addHook('onRequest', async (request, reply) => {
       // Perform any necessary onRequest logic here
@@ -68,7 +57,4 @@ async function ApiMonitor(fastify: FastifyInstance, options: MongoPluginOptions)
 }
 
 export const apiMonitorPlugin = fastifyPlugin(ApiMonitor);
-
-
-
 
