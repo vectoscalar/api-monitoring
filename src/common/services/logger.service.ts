@@ -4,9 +4,13 @@ export class Logger {
   logger: any;
 
   constructor() {
+    this.logger = null;
+  }
+
+  init(level: string) {
     this.logger = pino({
       name: 'FindMyVenue',
-      level: 'info',
+      level,
       transport: {
         target: 'pino/file',
         options: {
@@ -47,4 +51,4 @@ export class Logger {
   }
 }
 
-export const logger = new Logger().logger;
+export const logger = new Logger();
