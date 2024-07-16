@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
-import dbModels from '../models'
+import * as dbModels from '../models'
 
 import { logger } from '../common/services';
 
 export namespace MongooseClient {
   export let connection: mongoose.Connection | null = null;
 
-  export async function init() {
-    const mongoUrl = 'INSERT_DB_URL'
+  export async function init(mongoUrl: string) {
+    // const mongoUrl = 'INSERT_DB_URL'
 
 
     try {
@@ -16,7 +16,7 @@ export namespace MongooseClient {
       logger.info('Connected to MongoDB');
 
       // Initialize all models
-      Object.values(dbModels).forEach(model => model.init());
+      Object.values(dbModels).forEach((model:any) => model.init());
 
     } catch (error) {
       logger.error('Unable to connect to MongoDB:', error);

@@ -5,6 +5,8 @@ import { MongooseClient } from './clients/mongoClient';
 
 import { logger } from './common/services';
 
+import { ProjectDAO, OrganizationDAO, MicroserviceDAO } from './dao';
+
 interface MongoPluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
 }
@@ -26,8 +28,25 @@ declare module 'fastify' {
  */
 async function fastifyMongoDBPlugin(fastify: FastifyInstance, options: MongoPluginOptions) {
   
+  const {
+    mongoUrl,
+    organizationName,
+    projectName,
+    microserviceName,
+    gst
+  } = options;
+
   try {
-    await MongooseClient.init()
+    await MongooseClient.init(mongoUrl) 
+
+    const org:any = await new OrganizationDAO().upsertOrganization(organizationName, gst);
+    logger.log('Organization created ', org)
+
+    const project:any = await new ProjectDAO().upsertProject(org.id, projectName);
+    logger.log('Project created ', project)
+    
+    const microservice = await new MicroserviceDAO().upsertMicroservice(project.id, microserviceName);
+    logger.log('Microservice created ', microservice)
 
     fastify.addHook('onRequest', async (request, reply) => {
       // Perform any necessary onRequest logic here

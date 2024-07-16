@@ -5,7 +5,7 @@ import mongoose, { Document, Model, PopulateOptions, QueryOptions, UpdateQuery }
 abstract class BaseDAO {
   protected readonly model;
 
-  constructor(model) {
+  constructor(model: any) {
     this.model = model;
   }
 
@@ -37,7 +37,7 @@ abstract class BaseDAO {
     return findQuery.exec();
   }
 
-  async update(id: string, update, options?: QueryOptions) {
+  async update(id: string, update: any, options?: QueryOptions) {
     return this.model.findByIdAndUpdate(id, update, {
       new: true,
       ...options,
