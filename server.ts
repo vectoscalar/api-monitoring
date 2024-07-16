@@ -5,12 +5,14 @@ import { apiMonitorPlugin } from './src/index'; // Import your plugin
 const app = fastify();
 
 
-  mongoUrl: 'INSERT DB URL',
-  organizationName: 'o2',
-app.register(metricMonitorPlugin, {
+app.register(apiMonitorPlugin, {
+  mongoUrl: 'MONGO_DB_URL',
+  organizationName: 'o1',
   projectName: 'p1',
   microserviceName: 'm1',
+  logLevel: 'error'
 });
+
 // Server's own onRequest hook
 app.addHook('onRequest', async (request, reply) => {
   console.log('Server onRequest hook triggered');
