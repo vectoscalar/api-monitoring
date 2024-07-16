@@ -9,7 +9,7 @@ export class Logger {
 
   init(level: string) {
     this.logger = pino({
-      name: 'FindMyVenue',
+      name: 'ApiMonitor',
       level,
       transport: {
         target: 'pino/file',

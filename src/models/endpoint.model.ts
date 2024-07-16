@@ -13,8 +13,8 @@ export interface IEndpoint extends Document {
     deletedAt?: Date | null;
 }
 
-const endpointSchema = new Schema<IEndpoint>({
-    microserviceId: { type: Schema.Types.ObjectId, required: true },
+const endpointSchema = new Schema({
+    microserviceId: { type: Schema.Types.ObjectId, required: true }, // Corrected type here
     url: { type: String, required: true },
     version: { type: String, required: true },
     method: { type: String, required: true },

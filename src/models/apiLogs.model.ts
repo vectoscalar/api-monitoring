@@ -14,7 +14,7 @@ export interface IAPILog extends Document {
     createdAt: Date;
 }
 
-const apiLogSchema = new Schema<IAPILog>({
+const apiLogSchema = new Schema({
     endpointId: { type: Schema.Types.ObjectId, required: true },
     microserviceId: { type: Schema.Types.ObjectId, required: true },
     projectId: { type: Schema.Types.ObjectId, required: true },

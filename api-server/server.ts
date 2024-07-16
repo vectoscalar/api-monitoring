@@ -1,16 +1,17 @@
 import fastify from 'fastify';
-import { apiMonitorPlugin } from './src/index'; // Import your plugin
-// import { apiMonitorPlugin } from 'my-fastify-plugin'; // Import your plugin
+// import { apiMonitorPlugin } from '../src/index'; // Import your plugin
+import { apiMonitorPlugin } from 'my-fastify-plugin'; // Import your plugin
 
 const app = fastify();
 
 
 app.register(apiMonitorPlugin, {
-  mongoUrl: 'MONGO_DB_URL',
+  mongoUrl: 'DB_URL',
   organizationName: 'o1',
   projectName: 'p1',
   microserviceName: 'm1',
-  logLevel: 'error'
+  logLevel: 'info',
+  gst: '123'
 });
 
 // Server's own onRequest hook
