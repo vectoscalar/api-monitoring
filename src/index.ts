@@ -67,7 +67,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
         accountInfo: { organizationId, projectId, microserviceId },
       });
 
-      const endTime = new Date(request.startTime.getTime() + elapsedTime); // Calculate the end time
+      const endTime = new Date(request.startTime.getTime() + elapsedTime); 
 
       logger.trace(
         `onResponse hook transformed request log ${JSON.stringify(requestLog)}`
