@@ -6,7 +6,7 @@ interface PluginOptions extends FastifyPluginOptions {
   projectName: string;
   microserviceName: string;
   gst: string;
-  logLevel: string;
+  logLevel?: 'trace' | 'info';
 }
 
 declare module "my-fastify-plugin" {
