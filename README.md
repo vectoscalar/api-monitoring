@@ -27,4 +27,4 @@ Run `npm link 'my-fastify-plugin'`
 This step ensures that your server can use the locally linked plugin.
 
 Run Your Server:
-Execute `ts-node` server to start your server.
+Execute `ts-node` server to start your server. 

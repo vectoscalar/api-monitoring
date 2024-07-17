@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { ConnectOptions, MongooseOptions } from 'mongoose';
 import * as dbModels from '../models'
 
 import { logger } from '../common/services';
@@ -7,16 +7,14 @@ export namespace MongooseClient {
   export let connection: mongoose.Connection | null = null;
 
   export async function init(mongoUrl: string) {
-    // const mongoUrl = 'INSERT_DB_URL'
-
 
     try {
-      await mongoose.connect(mongoUrl);
+      await mongoose.connect(mongoUrl, { maxPoolSize: 10, minPoolSize: 5 });
       connection = mongoose.connection;
-      logger.info('Connected to MongoDB');
+      logger.trace('Connected to MongoDB');
 
       // Initialize all models
-      Object.values(dbModels).forEach((model:any) => model.init());
+      Object.values(dbModels).forEach((model: any) => model.init());
 
     } catch (error) {
       logger.error('Unable to connect to MongoDB:', error);
@@ -35,7 +33,7 @@ export namespace MongooseClient {
     if (connection) {
       await connection.close();
       connection = null;
-      logger.info('Disconnected from MongoDB');
+      logger.trace('Disconnected from MongoDB');
     }
   }
 }

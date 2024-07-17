@@ -1,4 +1,4 @@
-import { pino } from 'pino';
+import pino, { Logger as PinoLogger } from 'pino';
 
 export class Logger {
   logger: any;
@@ -48,6 +48,10 @@ export class Logger {
 
   warn(...message: any) {
     this.logger.warn(message);
+  }
+
+  trace(...message: any) {
+    this.logger.trace(message);
   }
 }
 
