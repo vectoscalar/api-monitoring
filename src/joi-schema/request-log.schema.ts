@@ -11,4 +11,6 @@ export const requestLogSchema = Joi.object({
   statusCode: Joi.number().required(),
   isSuccessfull: Joi.boolean().required(),
   errorMessage: Joi.string().allow(null),
+  responseTime: Joi.number().required(),
+  ipAddress: Joi.string().required(),
 }).required();

@@ -9,4 +9,5 @@ export type RequestLog = {
   statusCode: number;
   isSuccessfull: boolean;
   errorMessage?: string;
+  responseTime: number;
 };

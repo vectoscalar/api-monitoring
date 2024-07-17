@@ -1,6 +1,12 @@
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import fastifyPlugin from 'fastify-plugin';
-import { MongooseClient } from './clients/mongoClient';
+import {
+  FastifyInstance,
+  FastifyPluginOptions,
+  HookHandlerDoneFunction,
+} from "fastify";
+import fastifyPlugin from "fastify-plugin";
+import { MongoClient, Db } from "mongodb";
+import { MongooseClient } from "./clients/mongoClient";
+
 
 import { logger } from "./common/services";
 
@@ -31,7 +37,6 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     gst,
     logLevel,
   } = options;
-
   
   try {
     logger.init(logLevel || 'error')
@@ -41,13 +46,14 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
     const { organizationId, projectId, microserviceId } = await new UserAccountService().setAccountInfo(organizationName, gst, projectName, microserviceName);
 
+
     fastify.addHook("onRequest", async (request, reply) => {
       // Perform any necessary onRequest logic here
       logger.info("onRequest hook triggered");
     });
 
     fastify.addHook("onResponse", async (request, reply) => {
-      console.log("onResponse request");
+      logger.trace("onResponse reply", reply);
 
       const requestLogManager = RequestLogManager.getInstance();
 
@@ -57,7 +63,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
         accountInfo: { organizationId, projectId, microserviceId },
       });
 
-      logger.info(
+      logger.trace(
         `onResponse hook transformed request log ${JSON.stringify(requestLog)}`
       );
 
