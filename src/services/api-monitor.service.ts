@@ -43,8 +43,6 @@ export class RequestLogManager {
     const successRegex = /^[23]\d+$/;
     const isSuccessfull = successRegex.test(reply.statusCode.toString());
 
-    console.log("reoly object", reply.error);
-
     return {
       url: requestUrl,
       method: request.method,
@@ -85,7 +83,7 @@ export class RequestLogManager {
   }
 
   async saveRequestLogBatch(batch: RequestLog[], cb: Function) {
-    logger.info(
+    logger.trace(
       `RequestLogManager -> saveRequestLogBatch: ${JSON.stringify(batch)}`
     );
 
@@ -131,7 +129,7 @@ export class RequestLogManager {
   }
 
   addRequestLog(requestLog: RequestLog) {
-    logger.info(
+    logger.trace(
       `RequestLogManager -> addRequestLog: ${JSON.stringify(requestLog)}`
     );
     // check if the Request Log is valid

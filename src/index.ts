@@ -7,7 +7,6 @@ import fastifyPlugin from "fastify-plugin";
 import { MongoClient, Db } from "mongodb";
 import { MongooseClient } from "./clients/mongoClient";
 
-
 import { logger } from "./common/services";
 
 import { UserAccountService } from "./services";
@@ -19,7 +18,7 @@ interface PluginOptions extends FastifyPluginOptions {
   projectName: string;
   microserviceName: string;
   gst: string;
-  logLevel?: 'trace' | 'info';
+  logLevel?: "trace" | "info";
 }
 
 /**
@@ -37,15 +36,19 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     gst,
     logLevel,
   } = options;
-  
+
   try {
-    logger.init(logLevel || 'error')
+    logger.init(logLevel || "error");
 
-    await MongooseClient.init(mongoUrl)
+    await MongooseClient.init(mongoUrl);
 
-
-    const { organizationId, projectId, microserviceId } = await new UserAccountService().setAccountInfo(organizationName, gst, projectName, microserviceName);
-
+    const { organizationId, projectId, microserviceId } =
+      await new UserAccountService().setAccountInfo(
+        organizationName,
+        gst,
+        projectName,
+        microserviceName
+      );
 
     fastify.addHook("onRequest", async (request, reply) => {
       // Perform any necessary onRequest logic here
@@ -53,7 +56,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     });
 
     fastify.addHook("onResponse", async (request, reply) => {
-      logger.trace("onResponse reply", reply);
+      logger.trace("onResponse hook triggered");
 
       const requestLogManager = RequestLogManager.getInstance();
 
@@ -64,7 +67,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
       });
 
       logger.trace(
-        `onResponse hook transformed request log ${JSON.stringify(requestLog)}`
+        `onResponse hook: transformed request log ${JSON.stringify(requestLog)}`
       );
 
       requestLogManager?.addRequestLog(requestLog);
