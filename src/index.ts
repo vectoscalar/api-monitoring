@@ -1,11 +1,10 @@
 import { FastifyInstance, FastifyPluginOptions, HookHandlerDoneFunction } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
-import { MongoClient, Db } from 'mongodb';
 import { MongooseClient } from './clients/mongoClient';
-
+import { BaseService } from './common/services/index';
 import { logger } from './common/services';
 
-import { UserAccountService } from './services'
+import { UserAccountService, ApiLogService, EndpointService, MicroServiceService} from './services'
 
 interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
@@ -40,6 +39,8 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
     const { organizationId, projectId, microserviceId } = await new UserAccountService().setAccountInfo(organizationName, gst, projectName, microserviceName);
 
+    BaseService.setProperties({ organizationId, projectId, microserviceId });
+    
     fastify.addHook('onRequest', async (request, reply) => {
       // Perform any necessary onRequest logic here
       logger.info('onRequest hook triggered');

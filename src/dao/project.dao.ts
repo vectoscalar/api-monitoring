@@ -20,4 +20,9 @@ export class ProjectDAO extends BaseDAO {
     return project;
   }
 
+  async getAllProjectByOrganizationId(organizationId : string) {
+    const query = { organizationId  ,deletedAt: null };
+    return this.find(query);
+  }
+
 }
