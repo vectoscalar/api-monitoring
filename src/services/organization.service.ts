@@ -1,15 +1,11 @@
 import { OrganizationDAO } from '../dao';
-import { BaseService } from '../common/services/index';
 
 
-export class OrganizationService extends BaseService {
+export class OrganizationService{
   private organizationDAO: OrganizationDAO;
 
   constructor() {
-    super();
     this.organizationDAO = new OrganizationDAO();
   }
-
   
-
 }

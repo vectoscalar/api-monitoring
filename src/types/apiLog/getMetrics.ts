@@ -1,17 +1,9 @@
 export interface InvocationFilter {
-    endpointId?: string;
-    microserviceId?: string;
-    projectId?: string;
-    organizationId?: string;
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     ipAddress?: string;
 }
 
 export interface AvergaResponseFilter {
-    endpointId?: string;
-    microserviceId?: string;
-    projectId?: string;
-    organizationId?: string;
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
 

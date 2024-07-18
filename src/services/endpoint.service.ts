@@ -1,12 +1,10 @@
-import { ObjectId } from 'mongodb';
+import { UserAccountService } from './index';
 import { EndpointDAO } from '../dao';
-import { BaseService } from '../common/services/index';
 
-export class EndpointService extends BaseService {
+export class EndpointService {
   private endpointDAO: EndpointDAO;
 
   constructor() {
-    super();
     this.endpointDAO = new EndpointDAO();
   }
 
@@ -15,8 +13,8 @@ export class EndpointService extends BaseService {
    * @param microServiceId 
    * @returns 
    */
-  async getALLEndpointsByMicroserviceId(microServiceId: string) {
-    return this.endpointDAO.getALLEndpointsByMicroserviceId(microServiceId);
+  async getALLEndpointsByMicroserviceId() {
+    return this.endpointDAO.getALLEndpointsByMicroserviceId(UserAccountService.microserviceId);
   }
 
 }

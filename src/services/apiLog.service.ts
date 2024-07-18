@@ -1,17 +1,16 @@
 import { APILogDAO } from "../dao";
-import { BaseService } from "../common/services/index";
 import { ObjectId } from "mongodb";
-import { AvergaResponseFilter, InvocationFilter, PERIOD_FILTER } from "../types/index";
+import { AvergaResponseFilter, InvocationFilter,  } from "../types/index";
 
-export class ApiLogService extends BaseService {
+export class ApiLogService {
   private apiLogDAO: APILogDAO;
 
   constructor() {
-    super();
     this.apiLogDAO = new APILogDAO();
   }
 
   async getLatestInvocations(
+    endpointId: string,
     filter: InvocationFilter,
     limit: number,
     offset: number
@@ -19,20 +18,18 @@ export class ApiLogService extends BaseService {
 
     let query: any = {};
 
-    if (filter.endpointId) {
-      query.endpointId = filter.endpointId;
-    } else if (filter.microserviceId) {
-      query.microserviceId = filter.microserviceId;
-    } else if (filter.projectId) {
-      query.projectId = filter.projectId;
-    } else if (filter.organizationId) {
-      query.organizationId = filter.organizationId;
-    }
+    const { period, ipAddress } = filter;
 
-    if (filter.ipAddress) query.ipAddress = filter.ipAddress;
+    if (!endpointId) 
+      throw new Error("Endpoint ID must be provided");
 
-    if (filter.period) {
-      const { startDate, endDate } = this.getPeriodDateRange(filter.period);
+    query.endpointId = endpointId;
+
+
+    if (ipAddress) query.ipAddress = ipAddress;
+
+    if (period) {
+      const { startDate, endDate } = this.getPeriodDateRange(period);
       query.timestamp = { $gte: startDate, $lte: endDate };
     }
 
@@ -71,21 +68,16 @@ export class ApiLogService extends BaseService {
     return { startDate, endDate };
   }
 
-  async getAverageResponseTime(filter: AvergaResponseFilter) {
-    const { endpointId, microserviceId, projectId, organizationId, period } =
+  async getAverageResponseTime(endpointId: string,filter: AvergaResponseFilter) {
+    const {period } =
       filter;
     let query: any = {};
 
-    if (endpointId) {
-      query.endpointId = new ObjectId(endpointId);
-    } else if (microserviceId) {
-      query.microserviceId = new ObjectId(microserviceId);
-    } else if (projectId) {
-      query.projectId = new ObjectId(projectId);
-    } else if (organizationId) {
-      query.organizationId = new ObjectId(organizationId);
-    }
+    if (!endpointId) 
+      throw new Error("Endpoint ID must be provided");
 
+    query.endpointId = new ObjectId(endpointId);
+   
     if (period) {
       const { startDate, endDate } = this.getPeriodDateRange(period);
       query.timestamp = { $gte: startDate, $lte: endDate };
@@ -97,7 +89,10 @@ export class ApiLogService extends BaseService {
 
   async getMinResponseTime(endpointId: string, timePeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly') {
 
-    let query: any = { endpointId : new ObjectId(endpointId)};
+    let query: any = { 
+      endpointId : new ObjectId(endpointId),
+      isSuccessfull: true,
+    };
 
     if (timePeriod) {
       const { startDate, endDate } = this.getPeriodDateRange(timePeriod);
@@ -109,7 +104,10 @@ export class ApiLogService extends BaseService {
 
   async getMaxResponseTime(endpointId: string, timePeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly',) {
 
-    let query: any = { endpointId : new ObjectId(endpointId)};
+    let query: any = { 
+      endpointId : new ObjectId(endpointId),
+      isSuccessfull: true,
+    };
 
     if (timePeriod) {
       const { startDate, endDate } = this.getPeriodDateRange(timePeriod);

@@ -19,9 +19,4 @@ export class MicroserviceDAO extends BaseDAO {
     return microservice;
   }
 
-  async getAllMicroservicesByProjectId(projectId : string) {
-    const query = { projectId  ,deletedAt: null };
-    return this.find(query);
-  }
-
 }
