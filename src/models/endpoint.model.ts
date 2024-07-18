@@ -16,7 +16,7 @@ export interface IEndpoint extends Document {
 const endpointSchema = new Schema({
     microserviceId: { type: Schema.Types.ObjectId, required: true }, // Corrected type here
     url: { type: String, required: true },
-    version: { type: String, required: true },
+    version: { type: String},
     method: { type: String, required: true },
     totalResponseTime: { type: Number, default: 0 },
     totalInvocationCount: { type: Number, default: 0 },
