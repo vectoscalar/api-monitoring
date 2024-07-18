@@ -6,6 +6,8 @@ import mongoose, {
   UpdateQuery,
 } from "mongoose";
 
+import { logger } from "../common/services/logger.service";
+
 // Base DAO class implementing the interface
 abstract class BaseDAO {
   protected readonly model;
@@ -59,21 +61,17 @@ abstract class BaseDAO {
     await this.model.findByIdAndDelete(id).exec();
   }
 
-  async upsert(query: any, update: any): Promise<any> {
-    return this.model.findOneAndUpdate(query, update, {
-      upsert: true,
-      new: true,
-      projection: { __v: 0 },
-      setDefaultsOnInsert: true,
-    });
+  async upsert(query: any, update: any, options: any): Promise<any> {
+    return this.model.findOneAndUpdate(query, update, options);
   }
 
   async bulkWrite(operations: any) {
     return this.model.bulkWrite(operations);
   }
 
-  async insertMany(data: any[]) {
-    return this.model.insertMany(data);
+  async insertMany(data: any[], options: any) {
+    logger.trace("BaseDAO insertmany", data);
+    return this.model.insertMany(data, options);
   }
 }
 

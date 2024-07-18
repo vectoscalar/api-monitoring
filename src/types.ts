@@ -3,7 +3,7 @@ export type RequestLog = {
   version?: string;
   organizationId: string;
   projectId: string;
-  microserviceId: string;
+  microserviceId?: string;
   method: string;
   description?: string;
   statusCode: number;

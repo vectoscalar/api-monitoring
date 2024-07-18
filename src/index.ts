@@ -2,16 +2,17 @@ import {
   FastifyInstance,
   FastifyPluginOptions,
   HookHandlerDoneFunction,
+  FastifyRequest,
+  FastifyReply,
+  preSerializationHookHandler,
 } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 import { MongoClient, Db } from "mongodb";
 import { MongooseClient } from "./clients/mongoClient";
 
-
 import { logger } from "./common/services";
 
-import { UserAccountService } from "./services";
-import { RequestLogManager } from "./services/api-monitor.service";
+import { UserAccountService, RequestLogManager } from "./services";
 
 interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
@@ -19,7 +20,7 @@ interface PluginOptions extends FastifyPluginOptions {
   projectName: string;
   microserviceName: string;
   gst: string;
-  logLevel?: 'trace' | 'info';
+  logLevel?: "trace" | "info";
 }
 
 /**
@@ -37,20 +38,33 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     gst,
     logLevel,
   } = options;
-  
+
   try {
-    logger.init(logLevel || 'error')
+    logger.init(logLevel || "error");
 
-    await MongooseClient.init(mongoUrl)
+    await MongooseClient.init(mongoUrl);
 
-
-    const { organizationId, projectId, microserviceId } = await new UserAccountService().setAccountInfo(organizationName, gst, projectName, microserviceName);
-
+    const { organizationId, projectId, microserviceId } =
+      await new UserAccountService().setAccountInfo(
+        organizationName,
+        gst,
+        projectName,
+        microserviceName
+      );
 
     fastify.addHook("onRequest", async (request, reply) => {
       // Perform any necessary onRequest logic here
       logger.info("onRequest hook triggered");
     });
+
+    fastify.addHook("preSerialization", (async (
+      request: any,
+      reply: any,
+      payload: any
+    ) => {
+      reply.payload = payload;
+      return payload;
+    }) as preSerializationHookHandler);
 
     fastify.addHook("onResponse", async (request, reply) => {
       logger.trace("onResponse reply", reply);
@@ -63,14 +77,10 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
         accountInfo: { organizationId, projectId, microserviceId },
       });
 
-      logger.trace(
-        `onResponse hook transformed request log ${JSON.stringify(requestLog)}`
-      );
-
       requestLogManager?.addRequestLog(requestLog);
     });
-  } catch (err) {
-    logger.error(err);
+  } catch (err: any) {
+    logger.error("Error occured", err.message);
     throw new Error("Failed to connect to MongoDB");
   }
 }
