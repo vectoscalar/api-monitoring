@@ -1,16 +1,10 @@
-import {
-  FastifyInstance,
-  FastifyPluginOptions,
-  HookHandlerDoneFunction,
-} from "fastify";
-import fastifyPlugin from "fastify-plugin";
+import { FastifyInstance, FastifyPluginOptions, } from 'fastify';
+import fastifyPlugin from 'fastify-plugin';
+import { MongooseClient } from './clients/mongoClient';
 import { v4 as uuidv4 } from 'uuid';
-import { MongoClient, Db } from "mongodb";
-import { MongooseClient } from "./clients/mongoClient";
 
 
 import { logger } from "./common/services";
-
 import { UserAccountService } from "./services";
 import { RequestLogManager } from "./services/api-monitor.service";
 

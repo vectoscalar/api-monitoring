@@ -9,4 +9,10 @@ export class EndpointDAO extends BaseDAO {
     super(EndpointModel);
     this.model = EndpointModel;
   }
+
+  async getALLEndpointsByMicroserviceId(microserviceId: string) {
+    const query = { microserviceId,deletedAt: null };
+    return this.find(query);
+  }
+
 }

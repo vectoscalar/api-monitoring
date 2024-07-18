@@ -19,5 +19,4 @@ export class ProjectDAO extends BaseDAO {
     ).exec();
     return project;
   }
-
 }
