@@ -4,6 +4,7 @@ import {
   HookHandlerDoneFunction,
 } from "fastify";
 import fastifyPlugin from "fastify-plugin";
+import { v4 as uuidv4 } from 'uuid';
 import { MongoClient, Db } from "mongodb";
 import { MongooseClient } from "./clients/mongoClient";
 
@@ -48,9 +49,10 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
 
     fastify.addHook("onRequest", async (request: any, reply) => {
+      request.id = uuidv4();
       request.startTime = new Date(); 
       request.hrStartTime = process.hrtime(); 
-      logger.info(`Request started at: ${request.startTime.toISOString()}`);
+      logger.info(`[Request ID: ${request.id}] Request for ${request.method} ${request.url} started at: ${request.startTime.toISOString()}`);
     });
 
     fastify.addHook("onResponse", async (request: any, reply) => {
@@ -74,7 +76,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
       );
 
       logger.info(
-        `Request start time: ${request.startTime.toISOString()}, Request end time: ${endTime.toISOString()}, Elapsed time: ${elapsedTime.toFixed(2)} ms`
+        `[Request ID: ${request.id}] Request for ${request.method} ${request.url} started at: ${request.startTime.toISOString()}, ended at: ${endTime.toISOString()}, Elapsed time: ${elapsedTime.toFixed(2)} ms`
       );
 
       requestLogManager?.addRequestLog(requestLog);
