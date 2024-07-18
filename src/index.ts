@@ -7,8 +7,10 @@ import {
   preSerializationHookHandler,
 } from "fastify";
 import fastifyPlugin from "fastify-plugin";
-import { MongoClient, Db } from "mongodb";
+
 import { MongooseClient } from "./clients/mongoClient";
+
+import { v4 as uuidv4 } from "uuid";
 
 import { logger } from "./common/services";
 
@@ -52,21 +54,21 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
         microserviceName
       );
 
-    fastify.addHook("onRequest", async (request, reply) => {
-      // Perform any necessary onRequest logic here
-      logger.info("onRequest hook triggered");
+    fastify.addHook("onRequest", async (request: any, reply) => {
+      request.id = uuidv4();
+      request.startTime = new Date();
+      request.hrStartTime = process.hrtime();
+      logger.info(
+        `[Request ID: ${request.id}] Request for ${request.method} ${
+          request.url
+        } started at: ${request.startTime.toISOString()}`
+      );
     });
 
-    fastify.addHook("preSerialization", (async (
-      request: any,
-      reply: any,
-      payload: any
-    ) => {
-      reply.payload = payload;
-      return payload;
-    }) as preSerializationHookHandler);
+    fastify.addHook("onResponse", async (request: any, reply) => {
+      const hrEndTime = process.hrtime(request.hrStartTime);
+      const elapsedTime = (hrEndTime[0] * 1e9 + hrEndTime[1]) / 1e6;
 
-    fastify.addHook("onResponse", async (request, reply) => {
       logger.trace("onResponse reply", reply);
 
       const requestLogManager = RequestLogManager.getInstance();
@@ -77,8 +79,31 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
         accountInfo: { organizationId, projectId, microserviceId },
       });
 
+      const endTime = new Date(request.startTime.getTime() + elapsedTime);
+
+      logger.trace(
+        `onResponse hook transformed request log ${JSON.stringify(requestLog)}`
+      );
+
+      logger.info(
+        `[Request ID: ${request.id}] Request for ${request.method} ${
+          request.url
+        } started at: ${request.startTime.toISOString()}, ended at: ${endTime.toISOString()}, Elapsed time: ${elapsedTime.toFixed(
+          2
+        )} ms`
+      );
+
       requestLogManager?.addRequestLog(requestLog);
     });
+
+    fastify.addHook("preSerialization", (async (
+      request: any,
+      reply: any,
+      payload: any
+    ) => {
+      reply.payload = payload;
+      return payload;
+    }) as preSerializationHookHandler);
   } catch (err: any) {
     logger.error("Error occured", err.message);
     throw new Error("Failed to connect to MongoDB");

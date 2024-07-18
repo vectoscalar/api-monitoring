@@ -7,6 +7,24 @@ export class UserAccountService {
   private organizationDAO: OrganizationDAO;
   private microserviceDAO: MicroserviceDAO;
 
+  static organizationId: string;
+  static projectId: string;
+  static microserviceId: string;
+
+  static setProperties(properties: { organizationId: string, projectId: string, microserviceId: string }) {
+    UserAccountService.organizationId = properties.organizationId;
+    UserAccountService.projectId = properties.projectId;
+    UserAccountService.microserviceId = properties.microserviceId;
+   }
+
+  static getProperties() {
+    return {
+      organizationId: UserAccountService.organizationId,
+      projectId: UserAccountService.projectId,
+      microserviceId: UserAccountService.microserviceId,
+    };
+  }
+
   constructor() {
     this.projectDAO = new ProjectDAO();
     this.organizationDAO = new OrganizationDAO();
@@ -31,11 +49,14 @@ export class UserAccountService {
     );
     logger.info("Project created ", project);
 
-    const microservice: any = await this.microserviceDAO.upsertMicroservice(
-      project.id,
-      microserviceName
-    );
-    logger.info("Microservice created ", microservice.id);
+    const microservice:any = await this.microserviceDAO.upsertMicroservice(project.id, microserviceName);
+    logger.info('Microservice created ', microservice);
+
+    UserAccountService.organizationId = org.id;
+    UserAccountService.microserviceId = microservice.id;
+    UserAccountService.projectId = project.id;
+
+    return { organizationId: org.id, projectId: project.id, microserviceId: microservice.id }
 
     return {
       organizationId: org.id,
