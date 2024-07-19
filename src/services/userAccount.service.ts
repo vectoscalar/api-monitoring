@@ -41,16 +41,16 @@ export class UserAccountService {
       organizationName,
       gst
     );
-    logger.info("Organization created ", org);
+    logger.trace("Organization created ", org);
 
     const project: any = await this.projectDAO.upsertProject(
       org.id,
       projectName
     );
-    logger.info("Project created ", project);
+    logger.trace("Project created ", project);
 
     const microservice:any = await this.microserviceDAO.upsertMicroservice(project.id, microserviceName);
-    logger.info('Microservice created ', microservice);
+    logger.trace('Microservice created ', microservice);
 
     UserAccountService.organizationId = org.id;
     UserAccountService.microserviceId = microservice.id;
