@@ -12,10 +12,10 @@ export class OrganizationDAO extends BaseDAO {
   }
 
 
-  async upsertOrganization(name: string, gst: string): Promise<IOrganization | null> {
+  async upsertOrganization(name: string): Promise<IOrganization | null> {
     const org = await this.model.findOneAndUpdate(
-      { name, gst },
-      { name, gst, updatedAt: new Date() },
+      { name },
+      { name, updatedAt: new Date() },
       { new: true, upsert: true }
     ).exec();
     return org;

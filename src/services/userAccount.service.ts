@@ -33,15 +33,13 @@ export class UserAccountService {
 
   async setAccountInfo(
     organizationName: string,
-    gst: string,
     projectName: string,
     microserviceName: string
   ) {
     const org: any = await this.organizationDAO.upsertOrganization(
-      organizationName,
-      gst
+      organizationName
     );
-    logger.info("Organization created ", org);
+    logger.info(" Organization created ", org);
 
     const project: any = await this.projectDAO.upsertProject(
       org.id,
@@ -57,11 +55,5 @@ export class UserAccountService {
     UserAccountService.projectId = project.id;
 
     return { organizationId: org.id, projectId: project.id, microserviceId: microservice.id }
-
-    return {
-      organizationId: org.id,
-      projectId: project.id,
-      microserviceId: microservice.id,
-    };
   }
 }
