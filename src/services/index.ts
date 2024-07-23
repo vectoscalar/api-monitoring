@@ -7,3 +7,4 @@ export * from "./project.service";
 export * from "./microService.service";
 export * from "./apiMonitorInitializer.service";
 export * from "./processManager.service";
+export * from "./fastifyHooksSetUp.service";

@@ -6,8 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import { logger } from "./common/services";
 
-import { apiMonitorService, EndpointService, ApiLogService } from "./services";
-import FastifyHookService from "./services/fastifyHooksSetUp.service";
+import { apiMonitorService, EndpointService, ApiLogService, FastifyHookService } from "./services";
 
 import Queue from "better-queue";
 

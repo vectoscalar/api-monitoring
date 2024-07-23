@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/services';
 import { processManagerService } from './';
 
-class FastifyHookService {
+export class FastifyHookService {
   private fastify: FastifyInstance;
 
 
@@ -28,5 +28,3 @@ class FastifyHookService {
     }) as preSerializationHookHandler);
   }
 }
-
-export default FastifyHookService;
