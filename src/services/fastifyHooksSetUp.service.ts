@@ -14,11 +14,9 @@ class FastifyHookService {
 
   public setupHooks() {
     this.fastify.addHook("onRequest", async (request: any, reply) => {
-
       setImmediate(async () => {
         processManagerService.onRequestHander(request)
       })
-
     });
 
     this.fastify.addHook("onResponse", async (request: any, reply: any) => {
