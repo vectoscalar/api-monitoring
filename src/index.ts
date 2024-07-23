@@ -1,6 +1,9 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { logger } from "./common/services";
 
 import {
@@ -14,10 +17,11 @@ import Queue from "better-queue";
 
 interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
-  organizationName: string;
-  projectName: string;
-  microserviceName: string;
+  organizationName?: string;
+  projectName?: string;
+  microserviceName?: string;
   logLevel?: "trace" | "info";
+  serviceApiKey?: string;
   queueOptions?: Queue.QueueOptions<any, any>;
 }
 
@@ -28,12 +32,14 @@ interface PluginOptions extends FastifyPluginOptions {
  * @param options
  */
 async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
+
   const {
     mongoUrl,
     organizationName,
     projectName,
     microserviceName,
     logLevel = "error",
+    serviceApiKey,
     queueOptions,
   } = options;
 
@@ -46,6 +52,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
       projectName,
       microserviceName,
       logLevel,
+      serviceApiKey,
       queueOptions
     );
 

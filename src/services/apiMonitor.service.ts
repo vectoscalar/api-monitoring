@@ -6,19 +6,31 @@ import { requestLogQueue } from '.';
 
 export class ApiMonitorService {
 
-  async init(mongoUrl: string, organizationName: string, projectName: string, microserviceName: string, logLevel: string, queueOptions: any) {
+  async init(mongoUrl: string, organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any) {
     try {
       requestLogQueue.init(queueOptions);
 
       logger.init(logLevel);
 
-      await MongooseClient.init(mongoUrl);
+      if(process.env.mongoUrl) {
+        await MongooseClient.init(process.env.mongoUrl);
+      } else {
+        throw new Error('Database initialization failed. Please check the server logs for details.');
+      }
 
-      await new UserAccountService().setAccountInfo(
-        organizationName,
-        projectName,
-        microserviceName
-      );
+      if(serviceKey) {
+        await new UserAccountService().setAccountInfo(serviceKey);
+
+      } else if(organizationName && projectName && microserviceName) {
+        await new UserAccountService().insertAccountInfo(
+          organizationName,
+          projectName,
+          microserviceName
+        );
+      } else {
+        throw new Error('Either serviceApiKey or all three - organizationName, projectName, and microserviceName - must be provided.');
+      }
+
 
     } catch (err: any) {
       logger.error('Initialization failed', err);
