@@ -25,6 +25,12 @@ const apiLogSchema = new Schema({
     statusCode: { type: Number },
     errorMessage: { type: String },
     ipAddress: { type: String, required: true },
+    startTime: { type: Date, required: true },
+    endTime: { type: Date, required: true },
+    elapsedTime: { type: Number, required: true },
+    requestHeaderSize: { type: Number, required: true },
+    requestBodySize: { type: Number, required: true },
+    responseSize: { type: Number, required: true },
 }, {
     timestamps: true
 });
