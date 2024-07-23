@@ -1,12 +1,14 @@
-import {
-  FastifyInstance,
-  FastifyPluginOptions,
-} from "fastify";
+import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
 import { logger } from "./common/services";
 
-import { apiMonitorService, EndpointService, ApiLogService, FastifyHookService } from "./services";
+import {
+  apiMonitorService,
+  EndpointService,
+  ApiLogService,
+  FastifyHookService,
+} from "./services";
 
 import Queue from "better-queue";
 
@@ -31,26 +33,30 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     organizationName,
     projectName,
     microserviceName,
-    logLevel,
-    queueOptions
+    logLevel = "error",
+    queueOptions,
   } = options;
 
   try {
-    await apiMonitorService.init(mongoUrl, organizationName, projectName, microserviceName, logLevel || "error", queueOptions)
-
     const fastifyHookService = new FastifyHookService();
+
+    await apiMonitorService.init(
+      mongoUrl,
+      organizationName,
+      projectName,
+      microserviceName,
+      logLevel,
+      queueOptions
+    );
+
     fastifyHookService.setupHooks(fastify);
   } catch (err: any) {
     logger.error("Error occured", err.message);
-    throw new Error("Failed to connect to MongoDB");
+    throw err;
   }
 }
 
 const apiMonitorPlugin = fastifyPlugin(ApiMonitor);
 export default apiMonitorPlugin;
 
-export {
-  ApiLogService,
-  EndpointService
-}
-
+export { ApiLogService, EndpointService };

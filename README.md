@@ -1,30 +1,95 @@
-# api-monitoring
+# API Monitoring Plugin
 
-# Installation and Usage
+This README provides instructions for installing and using the API monitoring plugin, as well as visualizing the collected data.
 
-## Library Repository
-## Install Dependencies:
+## Table of Contents
+1. [Installation](#installation)
+   - [Library Repository](#library-repository)
+   - [Linking the Plugin](#linking-the-plugin)
+2. [Usage](#usage)
+3. [Data Visualization](#data-visualization)
+   - [Appsmith](#appsmith)
+   - [MongoDB Charts](#mongodb-charts)
 
-Navigate to the library repository.
-Run `npm install` to install the required dependencies.
+## Installation
 
-# Server Directory
-## Install Dependencies:
+### Library Repository
 
-Navigate to the server directory.
-Run `npm install` to install the necessary dependencies for your server.
-Install ts-node (if not already installed):
-If you haven’t installed ts-node, do so globally using `npm install -g ts-node`.
+1. Navigate to the library repository.
+2. Install dependencies:
 
-# Outer Repository (Linking the Plugin)
+### Linking the Plugin
+In the root folder of library/plugin create a symbolic link: using command npm link
 
-## Link the Plugin:
-In the outer repository (where your server and library reside), run `npm link`.
-This command creates a symbolic link for your plugin.
+## Usage
+1. import the plugin in your application use below 
+```
+        import { apiMonitorPlugin } from "api-monitor-plugin";
+```
 
-Link Your Fastify Plugin:
-Run `npm link 'my-fastify-plugin'` 
-This step ensures that your server can use the locally linked plugin.
+2. Register plugin  in fastify with different configuration options
+```
+        app.register(apiMonitorPlugin, {
+          mongoUrl:
+            "mongodb+srv://ss:sardana786@cluster0.hjv8pvk.mongodb.net/test",
+          organizationName: "o1",
+          projectName: "p1",
+          microserviceName: "m1",
+          logLevel: "info",
+        });
+```
+3. Run your Server
 
-Run Your Server:
-Execute `ts-node` server to start your server. 
+## Data Visualization
+
+### Appsmith
+
+1. **Connect to MongoDB:**
+   - Create a new Appsmith application
+   - Add a new MongoDB datasource
+   - Enter your MongoDB connection details
+
+2. **Create a new page and add a widget:**
+   - Add a new page to your application
+   - Drag and drop a chart widget onto the page
+
+3. **Write a MongoDB query:**
+   - Create a new mongo db query 
+   - Example query (adjust as needed):
+  ``` javascript
+            [
+            {
+              "$group": {
+               "_id": "$statusCode",
+               "invocationCount": {
+               "$sum": 1
+               }
+              }
+            }
+            ]
+```
+4. **Bind data to the chart widget:**
+    
+5. **Customize and deploy your application**
+
+### MongoDB Charts
+
+1. **Access MongoDB Charts:**
+   - Log in to MongoDB Atlas
+   - Navigate to the Charts section
+
+2. **Create a new dashboard and chart:**
+   - Click "New Dashboard"
+   - Add a new chart to the dashboard
+
+3. **Configure the chart:**
+   - Select your database and collection
+   - Choose an appropriate chart type (e.g., Line Chart for response times)
+   - Select fields to display (e.g., timestamp, response time)
+   - Apply any necessary aggregations or filters
+
+4. **Customize the chart appearance and save**
+
+5. **View your completed dashboard**
+
+For more detailed instructions on data visualization, refer to the Appsmith and MongoDB Charts documentation.
