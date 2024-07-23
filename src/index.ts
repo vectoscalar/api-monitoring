@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import { logger } from "./common/services";
 
-import { apiMonitorInitializer } from "./services";
+import { apiMonitorInitializer, EndpointService, ApiLogService } from "./services";
 import FastifyHookService from "./services/fastifyHooksSetUp.service";
 
 interface PluginOptions extends FastifyPluginOptions {
@@ -46,4 +46,9 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
 const apiMonitorPlugin = fastifyPlugin(ApiMonitor);
 export default apiMonitorPlugin;
+
+export {
+  ApiLogService,
+  EndpointService
+}
 

@@ -1,8 +1,8 @@
 import { MongooseClient } from '../clients/mongoClient';
-import { UserAccountService } from './';
+import { UserAccountService } from '.';
 import { logger } from '../common/services/index';
 
-import { requestLogQueue } from './';
+import { requestLogQueue } from '.';
 
 export class ApiMonitorInitializer {
 
@@ -19,6 +19,7 @@ export class ApiMonitorInitializer {
         projectName,
         microserviceName
       );
+
     } catch (err: any) {
       logger.error('Initialization failed', err);
       throw err;
