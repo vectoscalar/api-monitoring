@@ -33,35 +33,27 @@ export class UserAccountService {
 
   async setAccountInfo(
     organizationName: string,
-    gst: string,
     projectName: string,
     microserviceName: string
   ) {
     const org: any = await this.organizationDAO.upsertOrganization(
-      organizationName,
-      gst
+      organizationName
     );
-    logger.info("Organization created ", org);
+    logger.trace(" Organization created ", org);
 
     const project: any = await this.projectDAO.upsertProject(
       org.id,
       projectName
     );
-    logger.info("Project created ", project);
+    logger.trace("Project created ", project);
 
     const microservice:any = await this.microserviceDAO.upsertMicroservice(project.id, microserviceName);
-    logger.info('Microservice created ', microservice);
+    logger.trace('Microservice created ', microservice);
 
     UserAccountService.organizationId = org.id;
     UserAccountService.microserviceId = microservice.id;
     UserAccountService.projectId = project.id;
 
     return { organizationId: org.id, projectId: project.id, microserviceId: microservice.id }
-
-    return {
-      organizationId: org.id,
-      projectId: project.id,
-      microserviceId: microservice.id,
-    };
   }
 }

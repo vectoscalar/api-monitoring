@@ -5,61 +5,38 @@ import { logger } from "../common/services";
 import { RequestLog } from "../types";
 import { APILogDAO, EndpointDAO } from "../dao";
 
-export class RequestLogManager {
-  private static instance: RequestLogManager | null = null;
-  private requestLogQueue: Queue;
-  private queueOptions: Partial<Queue.QueueOptions<any, any>>;
+class RequestLogQueue {
+  private static instance: RequestLogQueue | null = null;
+  private requestLogQueue: Queue|null;
+  private queueOptions: Partial<Queue.QueueOptions<any, any>>|null;
   private endpointDAO: EndpointDAO;
   private apiLogDAO: APILogDAO;
 
-  private constructor(queueOptions: Partial<Queue.QueueOptions<any, any>>) {
-    this.queueOptions = queueOptions;
+  constructor() {
+    this.queueOptions = null;
     this.endpointDAO = new EndpointDAO();
     this.apiLogDAO = new APILogDAO();
-    this.requestLogQueue = new Queue(
-      this.saveRequestLogBatch.bind(this),
+    this.requestLogQueue = null;
+  }
+
+  init(queueOptions: Partial<Queue.QueueOptions<any, any>>) {
+    const {
+      batchSize = 2,
+      batchDelay = 10000,
+      batchDelayTimeout = 10000
+
+    } = queueOptions || {};
+
+    const mergedQueueOptions = Object.assign(
+      {},
+      { batchSize, batchDelay, batchDelayTimeout },
       queueOptions
     );
-  }
 
-  static getInstance(queueOptions?: Partial<Queue.QueueOptions<any, any>>) {
-    if (!RequestLogManager.instance) {
-      this.instance = new RequestLogManager(
-        queueOptions || {
-          batchSize: 2,
-          batchDelay: 10000,
-          batchDelayTimeout: 10000,
-          filter: RequestLogManager.validateRequestLog,
-        }
-      );
-    }
-    return this.instance;
-  }
-
-  getTransformedLog({ request, reply, accountInfo }: any) {
-    const protocol = request.protocol;
-    const host = request.headers.host;
-    const url = request.url;
-    const requestUrl = `${protocol}://${host}${url}`;
-
-    const successRegex = /^[23]\d+$/;
-    const isSuccessfull = successRegex.test(reply.statusCode.toString());
-
-    return {
-      url: requestUrl,
-      method: request.method,
-      statusCode: reply.statusCode,
-      errorMessage:
-        (!isSuccessfull &&
-          (reply.payload.message || reply.raw.statusMessage)) ||
-        null,
-      organizationId: accountInfo.organizationId,
-      projectId: accountInfo.projectId,
-      microserviceId: accountInfo.microserviceId,
-      isSuccessfull,
-      responseTime: reply.elapsedTime,
-      ipAddress: request.ip,
-    };
+    this.requestLogQueue = new Queue(
+      this.saveRequestLogBatch.bind(this),
+      mergedQueueOptions
+    );
   }
 
   getEndpointsRecordsForBatch(batch: RequestLog[]) {
@@ -177,7 +154,7 @@ export class RequestLogManager {
   }
 
   addRequestLog(requestLog: RequestLog) {
-    this.requestLogQueue.push(requestLog);
+    this.requestLogQueue?.push(requestLog);
 
     logger.trace(
       `RequestLogManager -> addRequestLog: log added to queue: ${JSON.stringify(
@@ -186,3 +163,5 @@ export class RequestLogManager {
     );
   }
 }
+
+export const requestLogQueue = new RequestLogQueue();

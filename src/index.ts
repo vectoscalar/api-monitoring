@@ -1,28 +1,22 @@
 import {
   FastifyInstance,
   FastifyPluginOptions,
-  HookHandlerDoneFunction,
-  FastifyRequest,
-  FastifyReply,
-  preSerializationHookHandler,
 } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
-import { MongooseClient } from "./clients/mongoClient";
-
-import { v4 as uuidv4 } from "uuid";
-
 import { logger } from "./common/services";
 
-import { UserAccountService, RequestLogManager } from "./services";
+import { apiMonitorService, EndpointService, ApiLogService, FastifyHookService } from "./services";
+
+import Queue from "better-queue";
 
 interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
   organizationName: string;
   projectName: string;
   microserviceName: string;
-  gst: string;
   logLevel?: "trace" | "info";
+  queueOptions?: Queue.QueueOptions<any, any>;
 }
 
 /**
@@ -37,77 +31,26 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     organizationName,
     projectName,
     microserviceName,
-    gst,
     logLevel,
+    queueOptions
   } = options;
 
   try {
-    logger.init(logLevel || "error");
+    await apiMonitorService.init(mongoUrl, organizationName, projectName, microserviceName, logLevel || "error", queueOptions)
 
-    await MongooseClient.init(mongoUrl);
-
-    const { organizationId, projectId, microserviceId } =
-      await new UserAccountService().setAccountInfo(
-        organizationName,
-        gst,
-        projectName,
-        microserviceName
-      );
-
-    fastify.addHook("onRequest", async (request: any, reply) => {
-      request.id = uuidv4();
-      request.startTime = new Date();
-      request.hrStartTime = process.hrtime();
-      logger.info(
-        `[Request ID: ${request.id}] Request for ${request.method} ${
-          request.url
-        } started at: ${request.startTime.toISOString()}`
-      );
-    });
-
-    fastify.addHook("onResponse", async (request: any, reply) => {
-      const hrEndTime = process.hrtime(request.hrStartTime);
-      const elapsedTime = (hrEndTime[0] * 1e9 + hrEndTime[1]) / 1e6;
-
-      logger.trace("onResponse reply", reply);
-
-      const requestLogManager = RequestLogManager.getInstance();
-
-      const requestLog = requestLogManager!.getTransformedLog({
-        request,
-        reply,
-        accountInfo: { organizationId, projectId, microserviceId },
-      });
-
-      const endTime = new Date(request.startTime.getTime() + elapsedTime);
-
-      logger.trace(
-        `onResponse hook transformed request log ${JSON.stringify(requestLog)}`
-      );
-
-      logger.info(
-        `[Request ID: ${request.id}] Request for ${request.method} ${
-          request.url
-        } started at: ${request.startTime.toISOString()}, ended at: ${endTime.toISOString()}, Elapsed time: ${elapsedTime.toFixed(
-          2
-        )} ms`
-      );
-
-      requestLogManager?.addRequestLog(requestLog);
-    });
-
-    fastify.addHook("preSerialization", (async (
-      request: any,
-      reply: any,
-      payload: any
-    ) => {
-      reply.payload = payload;
-      return payload;
-    }) as preSerializationHookHandler);
+    const fastifyHookService = new FastifyHookService();
+    fastifyHookService.setupHooks(fastify);
   } catch (err: any) {
     logger.error("Error occured", err.message);
     throw new Error("Failed to connect to MongoDB");
   }
 }
 
-export const apiMonitorPlugin = fastifyPlugin(ApiMonitor);
+const apiMonitorPlugin = fastifyPlugin(ApiMonitor);
+export default apiMonitorPlugin;
+
+export {
+  ApiLogService,
+  EndpointService
+}
+

@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
+import { ApiLogService, EndpointService } from "./services";
 
 interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
@@ -14,4 +15,7 @@ declare module "my-fastify-plugin" {
     fastify: FastifyInstance,
     options: PluginOptions
   ): Promise<void>;
+
+  export { ApiLogService, EndpointService };
+
 }
