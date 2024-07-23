@@ -6,7 +6,7 @@ import { requestLogQueue } from '.';
 
 export class ApiMonitorService {
 
-  async init(mongoUrl: string, organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any) {
+  async init(organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any) {
     try {
       requestLogQueue.init(queueOptions);
 

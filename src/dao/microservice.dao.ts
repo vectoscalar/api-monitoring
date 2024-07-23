@@ -15,7 +15,6 @@ export class MicroserviceDAO extends BaseDAO {
     const existingMicroservice = await this.findOne({ projectId, name });
 
     if (existingMicroservice) {
-      console.log('Here existing', existingMicroservice._id)
       return existingMicroservice._id;
     }else {
       const newMicroservice = await this.create({
