@@ -37,7 +37,7 @@ class ProcessManagerService {
   }
 
 
-  onResponseHandler(request: any, reply: any, payload: any): void {
+  onResponseHandler(request: any, reply: any): void {
     setImmediate(async () => {
       const requestDataObj = this.requestData.get(request.apiMonitoringId);
 
@@ -48,13 +48,15 @@ class ProcessManagerService {
         const elapsedTime = (hrEndTime[0] * 1e9 + hrEndTime[1]) / 1e6;
         const endTime = new Date(startTime.getTime() + elapsedTime);
 
+        const payload = reply.payload;
+
         logger.info(
           `[Request ID: ${request.apiMonitoringId}] Request for ${request.method} ${request.url} started at: ${startTime.toISOString()}, ended at: ${endTime.toISOString()}, Elapsed time: ${elapsedTime.toFixed(2)} ms`
         );
 
         const headersSize = Buffer.byteLength(JSON.stringify(request.headers), 'utf8');
         const responseHeadersSize = Buffer.byteLength(JSON.stringify(reply.getHeaders()), 'utf8');
-        const bodySize = Buffer.byteLength(JSON.stringify(reply.payload), 'utf8');
+        const bodySize = Buffer.byteLength(JSON.stringify(payload), 'utf8');
         const responseSize = (responseHeadersSize + bodySize) / 1024; // in KB
         const requestBodySize = request.body ? Buffer.byteLength(JSON.stringify(request.body), 'utf8') : 0;
 
@@ -82,7 +84,7 @@ class ProcessManagerService {
           requestHeaderSize: headersSize,
           requestBodySize,
           responseSize,
-          responseBody: reply.payload
+          responseBody: payload
         };
 
         logger.info(`[Request ID: ${request.apiMonitoringId}] Processed log: ${JSON.stringify(logObj)}`);

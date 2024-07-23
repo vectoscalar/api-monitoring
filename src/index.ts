@@ -38,7 +38,8 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
   try {
     await apiMonitorService.init(mongoUrl, organizationName, projectName, microserviceName, logLevel || "error", queueOptions)
 
-    new FastifyHookService(fastify);
+    const fastifyHookService = new FastifyHookService();
+    fastifyHookService.setupHooks(fastify);
   } catch (err: any) {
     logger.error("Error occured", err.message);
     throw new Error("Failed to connect to MongoDB");
