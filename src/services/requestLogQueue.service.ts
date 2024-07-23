@@ -39,52 +39,6 @@ class RequestLogQueue {
     );
   }
 
-  // static getInstance(queueOptions?: Partial<Queue.QueueOptions<any, any>>) {   //init
-
-  //   // destructre values out of queueOptions, instae f hardcoded
-
-  //   if (!RequestLogManager.instance) {
-  //     // this.instance = new RequestLogManager(
-  //     //   queueOptions || {
-  //     //     batchSize: 2,
-  //     //     batchDelay: 10000,
-  //     //     batchDelayTimeout: 10000,
-  //     //     filter: RequestLogManager.validateRequestLog,
-  //     //   }
-  //     // );
-  //   }
-  //   return this.instance;
-  // }
-
-  // getTransformedLog({ request, reply, accountInfo }: any) {
-  //   const protocol = request.protocol;
-  //   const host = request.headers.host;
-  //   const url = request.url;
-  //   const requestUrl = `${protocol}://${host}${url}`;
-
-  //   const successRegex = /^[23]\d+$/;
-  //   const isSuccessfull = successRegex.test(reply.statusCode.toString());
-
-  //   return {
-  //     url: requestUrl,
-  //     method: request.method,
-  //     statusCode: reply.statusCode,
-  //     errorMessage:
-  //       (!isSuccessfull &&
-  //         (reply.payload.message || reply.raw.statusMessage)) ||
-  //       null,
-  //     organizationId: accountInfo.organizationId,
-  //     projectId: accountInfo.projectId,
-  //     microserviceId: accountInfo.microserviceId,
-  //     isSuccessfull,
-  //     responseTime: reply.elapsedTime,
-  //     ipAddress: request.ip,
-  //     /**
-  //      * startTime, endTime, res body size, header size... 
-  //      */
-  //   };
-  // }
-
   getEndpointsRecordsForBatch(batch: RequestLog[]) {
     const endpointsMap: { [key: string]: any } = {};
 

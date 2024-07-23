@@ -7,7 +7,6 @@ import { requestLogQueue, UserAccountService } from './';
 
 class ProcessManagerService {
   private requestData: Map<string, any>;
-  // TODO: Create userServiceAccount instance in ths hook, to get (orgId, projId, microserId) from there. 
 
   constructor() {
     this.requestData = new Map();
@@ -36,7 +35,6 @@ class ProcessManagerService {
 
   onResponseHandler(request: any, reply: FastifyReply, payload: any): void {
     const requestDataObj = this.requestData.get(request.apiMonitoringId);
-    console.log('here', request.body)
 
     if (requestDataObj) {
       const { startTime, hrStartTime } = requestDataObj;
@@ -81,8 +79,6 @@ class ProcessManagerService {
         requestBodySize,
         responseSize
       };
-
-      console.log('logObj', logObj)
 
       logger.info(`[Request ID: ${request.apiMonitoringId}] Processed log: ${JSON.stringify(logObj)}`);
 
