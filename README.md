@@ -36,7 +36,7 @@ In the root folder of library/plugin create a symbolic link: using command npm l
 ```
         app.register(apiMonitorPlugin, {
           mongoUrl:
-            "mongodb+srv://ss:sardana786@cluster0.hjv8pvk.mongodb.net/test",
+            "mongo url",
           organizationName: "o1",
           projectName: "p1",
           microserviceName: "m1",
