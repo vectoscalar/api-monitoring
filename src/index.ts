@@ -6,8 +6,10 @@ import fastifyPlugin from "fastify-plugin";
 
 import { logger } from "./common/services";
 
-import { apiMonitorInitializer, EndpointService, ApiLogService } from "./services";
+import { apiMonitorService, EndpointService, ApiLogService } from "./services";
 import FastifyHookService from "./services/fastifyHooksSetUp.service";
+
+import Queue from "better-queue";
 
 interface PluginOptions extends FastifyPluginOptions {
   mongoUrl: string;
@@ -15,7 +17,7 @@ interface PluginOptions extends FastifyPluginOptions {
   projectName: string;
   microserviceName: string;
   logLevel?: "trace" | "info";
-  queueOptions?: object;
+  queueOptions?: Queue.QueueOptions<any, any>;
 }
 
 /**
@@ -35,7 +37,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
   } = options;
 
   try {
-    await apiMonitorInitializer.init(mongoUrl, organizationName, projectName, microserviceName, logLevel || "error", queueOptions)
+    await apiMonitorService.init(mongoUrl, organizationName, projectName, microserviceName, logLevel || "error", queueOptions)
 
     new FastifyHookService(fastify);
   } catch (err: any) {

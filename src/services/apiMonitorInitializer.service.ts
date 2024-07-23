@@ -4,7 +4,7 @@ import { logger } from '../common/services/index';
 
 import { requestLogQueue } from '.';
 
-export class ApiMonitorInitializer {
+export class ApiMonitorService {
 
   async init(mongoUrl: string, organizationName: string, projectName: string, microserviceName: string, logLevel: string, queueOptions: any) {
     try {
@@ -28,5 +28,5 @@ export class ApiMonitorInitializer {
 
 }
 
-export const apiMonitorInitializer = new ApiMonitorInitializer()
+export const apiMonitorService = new ApiMonitorService()
 

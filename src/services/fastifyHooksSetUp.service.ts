@@ -12,29 +12,19 @@ class FastifyHookService {
     this.setupHooks()
   }
 
-  public setupHooks() {
+  setupHooks() {
     this.fastify.addHook("onRequest", async (request: any, reply) => {
-      setImmediate(async () => {
-        processManagerService.onRequestHander(request)
-      })
+      processManagerService.onRequestHander(request)
     });
 
     this.fastify.addHook("onResponse", async (request: any, reply: any) => {
-      setImmediate(async () => {
-        processManagerService.onResponseHandler(request, reply, reply.payload)
-      })
+      processManagerService.onResponseHandler(request, reply, reply.payload);
     });
 
 
 
-    this.fastify.addHook("onSend", (async (
-      request: any,
-      reply: any,
-      payload: any
-    ) => {
-      setImmediate(async () => {
-        processManagerService.onSendHandler(request, reply, payload)
-      })
+    this.fastify.addHook("onSend", (async (request: any, reply: any, payload: any) => {
+      processManagerService.onSendHandler(request, reply, payload)
     }) as preSerializationHookHandler);
   }
 }
