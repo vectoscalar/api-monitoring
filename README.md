@@ -3,6 +3,7 @@
 This README provides instructions for installing and using the API monitoring plugin, as well as visualizing the collected data.
 
 ## Table of Contents
+
 1. [Installation](#installation)
    - [Library Repository](#library-repository)
    - [Linking the Plugin](#linking-the-plugin)
@@ -19,15 +20,19 @@ This README provides instructions for installing and using the API monitoring pl
 2. Install dependencies:
 
 ### Linking the Plugin
+
 In the root folder of library/plugin create a symbolic link: using command npm link
 
 ## Usage
-1. import the plugin in your application use below 
+
+1. import the plugin in your application use below
+
 ```
-        import { apiMonitorPlugin } from "api-monitor-plugin";
+        import apiMonitorPlugin from "api-monitor-plugin";
 ```
 
-2. Register plugin  in fastify with different configuration options
+2. Register plugin in fastify with different configuration options
+
 ```
         app.register(apiMonitorPlugin, {
           mongoUrl:
@@ -38,6 +43,7 @@ In the root folder of library/plugin create a symbolic link: using command npm l
           logLevel: "info",
         });
 ```
+
 3. Run your Server
 
 ## Data Visualization
@@ -45,44 +51,50 @@ In the root folder of library/plugin create a symbolic link: using command npm l
 ### Appsmith
 
 1. **Connect to MongoDB:**
+
    - Create a new Appsmith application
    - Add a new MongoDB datasource
    - Enter your MongoDB connection details
 
 2. **Create a new page and add a widget:**
+
    - Add a new page to your application
    - Drag and drop a chart widget onto the page
 
 3. **Write a MongoDB query:**
-   - Create a new mongo db query 
+   - Create a new mongo db query
    - Example query (adjust as needed):
-  ``` javascript
-            [
-            {
-              "$group": {
-               "_id": "$statusCode",
-               "invocationCount": {
-               "$sum": 1
-               }
-              }
-            }
-            ]
+
+```javascript
+[
+  {
+    $group: {
+      _id: "$statusCode",
+      invocationCount: {
+        $sum: 1,
+      },
+    },
+  },
+];
 ```
+
 4. **Bind data to the chart widget:**
-    
 5. **Customize and deploy your application**
 
 ### MongoDB Charts
 
 1. **Access MongoDB Charts:**
+
    - Log in to MongoDB Atlas
    - Navigate to the Charts section
 
 2. **Create a new dashboard and chart:**
+
    - Click "New Dashboard"
    - Add a new chart to the dashboard
 
 3. **Configure the chart:**
+
    - Select your database and collection
    - Choose an appropriate chart type (e.g., Line Chart for response times)
    - Select fields to display (e.g., timestamp, response time)
