@@ -15,11 +15,15 @@ import {
 
 import Queue from "better-queue";
 
-interface PluginOptions extends FastifyPluginOptions {
+interface AccountInfo {
   organizationName?: string;
   projectName?: string;
   microserviceName?: string;
-  logLevel?: "trace" | "info";
+}
+
+interface PluginOptions extends FastifyPluginOptions {
+  accountInfo?: AccountInfo;
+  logLevel?: "trace" | "info" | "error";
   serviceApiKey?: string;
   queueOptions?: Queue.QueueOptions<any, any>;
 }
@@ -33,9 +37,11 @@ interface PluginOptions extends FastifyPluginOptions {
 async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
   const {
-    organizationName,
-    projectName,
-    microserviceName,
+    accountInfo: {
+      organizationName,
+      projectName,
+      microserviceName
+    } = {},
     logLevel = "error",
     serviceApiKey,
     queueOptions,

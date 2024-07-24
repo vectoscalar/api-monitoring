@@ -15,7 +15,7 @@ export class MicroserviceDAO extends BaseDAO {
     const existingMicroservice = await this.findOne({ projectId, name });
 
     if (existingMicroservice) {
-      return existingMicroservice._id;
+      return existingMicroservice;
     }else {
       const newMicroservice = await this.create({
         projectId,
@@ -23,7 +23,7 @@ export class MicroserviceDAO extends BaseDAO {
         apiKey: new mongoose.Types.ObjectId(), 
       });
 
-      return newMicroservice._id;
+      return newMicroservice;
     }
   }
 

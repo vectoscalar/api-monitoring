@@ -51,7 +51,7 @@ export class UserAccountService {
     logger.trace('Microservice created ', microservice);
 
     UserAccountService.organizationId = org.id;
-    UserAccountService.microserviceId = microservice.id;
+    UserAccountService.microserviceId = microservice._id.toString();
     UserAccountService.projectId = project.id;
 
     return { organizationId: org.id, projectId: project.id, microserviceId: microservice.id }
@@ -62,6 +62,10 @@ export class UserAccountService {
     serviceKey: string,
   ) {
     const accountInfo:any = await this.microserviceDAO.getAccountDetailsByApiKey(serviceKey);
+
+    if(!accountInfo.length) {
+      throw Error("Service key not found. Please ensure the provided service key is correct.")
+    }
 
     const { organizationId, projectId, microserviceId } = accountInfo[0];
 
