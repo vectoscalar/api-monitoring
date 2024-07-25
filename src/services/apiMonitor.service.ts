@@ -41,8 +41,8 @@ export class ApiMonitorService {
         }
 
         await MongooseClient.init(mongoUrl);
-        
-        await new UserAccountService().insertAccountInfo(
+
+        await new UserAccountService().setAccountInfo(
           organizationName,
           projectName,
           microserviceName

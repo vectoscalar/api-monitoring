@@ -31,7 +31,7 @@ export class UserAccountService {
     this.microserviceDAO = new MicroserviceDAO();
   }
 
-  async upsertAccountInfo(
+  async setAccountInfo(
     organizationName: string,
     projectName: string,
     microserviceName: string
