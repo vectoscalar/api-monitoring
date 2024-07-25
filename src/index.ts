@@ -16,9 +16,10 @@ import {
 import Queue from "better-queue";
 
 interface AccountInfo {
-  organizationName?: string;
-  projectName?: string;
-  microserviceName?: string;
+  mongoUrl: string;
+  organizationName: string;
+  projectName: string;
+  microserviceName: string;
 }
 
 interface PluginOptions extends FastifyPluginOptions {
@@ -38,6 +39,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
 
   const {
     accountInfo: {
+      mongoUrl,
       organizationName,
       projectName,
       microserviceName
@@ -51,6 +53,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     const fastifyHookService = new FastifyHookService();
 
     await apiMonitorService.init(
+      mongoUrl,
       organizationName,
       projectName,
       microserviceName,

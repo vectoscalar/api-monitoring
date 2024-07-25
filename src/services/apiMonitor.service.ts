@@ -1,34 +1,54 @@
 import { MongooseClient } from '../clients/mongoClient';
 import { UserAccountService } from '.';
-import { logger } from '../common/services/index';
+import { axiosClient, logger } from '../common/services/index';
 
 import { requestLogQueue } from '.';
 
 export class ApiMonitorService {
 
-  async init(organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any) {
+  async init(mongoUrl: string | undefined, organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any) {
     try {
       requestLogQueue.init(queueOptions);
 
       logger.init(logLevel);
 
-      if(process.env.mongoUrl) {
-        await MongooseClient.init(process.env.mongoUrl);
-      } else {
-        throw new Error('Database initialization failed. Please check the server logs for details.');
-      }
+      if (serviceKey) {
 
-      if(serviceKey) {
-        await new UserAccountService().setAccountInfo(serviceKey);
+        const userAccountInfo = await axiosClient.get(
+          'https://66a0bce27053166bcabc8e93.mockapi.io/api/v1/account/user',
+          { 'api-key': serviceKey },
+        )
 
-      } else if(organizationName && projectName && microserviceName) {
+
+        const { mongoUrl, organizationId, projectId, microserviceId } = userAccountInfo.data[0].data;
+
+        if (!mongoUrl) {
+          throw new Error('Database initialization failed. Please check the server logs for details.');
+        }
+
+        await MongooseClient.init(mongoUrl);
+        delete userAccountInfo.data[0].data['mongoUrl'];
+
+        if (!organizationId || !projectId || !microserviceId) {
+          throw new Error('Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.');
+        }
+
+        UserAccountService.setProperties(userAccountInfo.data[0].data);
+      } else if (organizationName && projectName && microserviceName) {
+
+        if (!mongoUrl) {
+          throw new Error('Database initialization failed. Mongo URL is missing or invalid.');
+        }
+
+        await MongooseClient.init(mongoUrl);
+        
         await new UserAccountService().insertAccountInfo(
           organizationName,
           projectName,
           microserviceName
         );
       } else {
-        throw new Error('Either serviceApiKey or all three - organizationName, projectName, and microserviceName - must be provided.');
+        throw new Error('Either serviceApiKey or all four - organizationName, projectName, microserviceName and mongoUrl - must be provided.');
       }
 
 
