@@ -1,9 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 import { logger } from "./common/services";
 
 import {

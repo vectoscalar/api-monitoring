@@ -27,46 +27,5 @@ export class MicroserviceDAO extends BaseDAO {
     }
   }
 
-  async getAccountDetailsByApiKey(apiKey: string) {
-    try {
-
-      const result = await this.model.aggregate([
-        { $match: { apiKey: new mongoose.Types.ObjectId(apiKey) } },
-        {
-          $lookup: {
-            from: 'projects',
-            localField: 'projectId',
-            foreignField: '_id',
-            as: 'project'
-          }
-        },
-        { $unwind: '$project' },
-        {
-          $lookup: {
-            from: 'organizations',
-            localField: 'project.organizationId',
-            foreignField: '_id',
-            as: 'organization'
-          }
-        },
-        { $unwind: '$organization' },
-        {
-          $project: {
-            microserviceId: '$_id',
-            organizationId: '$organization._id',
-            projectId: '$project._id'
-          }
-        }
-      ]);
-
-      logger.trace('Account details for for apiKey:', apiKey, JSON.stringify(result));
-
-      return result;
-    } catch (error) {
-      logger.trace('Error in getAccountDetailsByApiKey:', error);
-      throw error;
-    }
-  }
-
 
 }
