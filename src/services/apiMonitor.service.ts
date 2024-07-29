@@ -3,6 +3,7 @@ import { UserAccountService } from '.';
 import { axiosClient, logger } from '../common/services/index';
 
 import { requestLogQueue } from '.';
+import { USER_ACCOUNT_INFO_ENDPOINT } from '../common/constant';
 
 export class ApiMonitorService {
 
@@ -15,7 +16,7 @@ export class ApiMonitorService {
       if (serviceKey) {
 
         const userAccountInfo = await axiosClient.get(
-          'https://66a0bce27053166bcabc8e93.mockapi.io/api/v1/account/user',
+          USER_ACCOUNT_INFO_ENDPOINT,
           { 'api-key': serviceKey },
         )
 
@@ -30,6 +31,7 @@ export class ApiMonitorService {
         delete userAccountInfo.data[0].data['mongoUrl'];
 
         if (!organizationId || !projectId || !microserviceId) {
+          logger.error('Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.')
           throw new Error('Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.');
         }
 

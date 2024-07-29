@@ -60,6 +60,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     );
 
     fastifyHookService.setupHooks(fastify);
+
   } catch (err: any) {
     logger.error("Error occured", err.message);
     throw err;
