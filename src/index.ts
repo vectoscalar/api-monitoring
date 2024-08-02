@@ -12,12 +12,17 @@ import {
 
 import Queue from "better-queue";
 
-interface PluginOptions extends FastifyPluginOptions {
+interface AccountInfo {
   mongoUrl: string;
   organizationName: string;
   projectName: string;
   microserviceName: string;
-  logLevel?: "trace" | "info";
+}
+
+interface PluginOptions extends FastifyPluginOptions {
+  accountInfo?: AccountInfo;
+  logLevel?: "trace" | "info" | "error";
+  serviceApiKey?: string;
   queueOptions?: Queue.QueueOptions<any, any>;
 }
 
@@ -28,12 +33,16 @@ interface PluginOptions extends FastifyPluginOptions {
  * @param options
  */
 async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
+
   const {
-    mongoUrl,
-    organizationName,
-    projectName,
-    microserviceName,
+    accountInfo: {
+      mongoUrl,
+      organizationName,
+      projectName,
+      microserviceName
+    } = {},
     logLevel = "error",
+    serviceApiKey,
     queueOptions,
   } = options;
 
@@ -46,10 +55,12 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
       projectName,
       microserviceName,
       logLevel,
+      serviceApiKey,
       queueOptions
     );
 
     fastifyHookService.setupHooks(fastify);
+
   } catch (err: any) {
     logger.error("Error occured", err.message);
     throw err;

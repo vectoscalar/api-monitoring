@@ -15,7 +15,7 @@ export class UserAccountService {
     UserAccountService.organizationId = properties.organizationId;
     UserAccountService.projectId = properties.projectId;
     UserAccountService.microserviceId = properties.microserviceId;
-   }
+  }
 
   static getProperties() {
     return {
@@ -47,13 +47,14 @@ export class UserAccountService {
     );
     logger.trace("Project created ", project);
 
-    const microservice:any = await this.microserviceDAO.upsertMicroservice(project.id, microserviceName);
+    const microservice: any = await this.microserviceDAO.upsertMicroservice(project.id, microserviceName);
     logger.trace('Microservice created ', microservice);
 
     UserAccountService.organizationId = org.id;
-    UserAccountService.microserviceId = microservice.id;
+    UserAccountService.microserviceId = microservice._id.toString();
     UserAccountService.projectId = project.id;
 
     return { organizationId: org.id, projectId: project.id, microserviceId: microservice.id }
   }
+
 }
