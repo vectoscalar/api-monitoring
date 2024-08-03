@@ -1,14 +1,17 @@
 import Queue from "better-queue";
 import { requestLogSchema } from "../joi-schema";
 import { MongooseClient } from "../clients/mongoClient";
-import { logger } from "../common/services";
+import { logger, axiosClient } from "../common/services";
 import { RequestLog } from "../types";
 import { APILogDAO, EndpointDAO } from "../dao";
+import { UserAccountService } from './';
+import { BASE_URL_SAAS, getSaveLogsEndpoint } from "../common/constant";
+
 
 class RequestLogQueue {
   private static instance: RequestLogQueue | null = null;
-  private requestLogQueue: Queue|null;
-  private queueOptions: Partial<Queue.QueueOptions<any, any>>|null;
+  private requestLogQueue: Queue | null;
+  private queueOptions: Partial<Queue.QueueOptions<any, any>> | null;
   private endpointDAO: EndpointDAO;
   private apiLogDAO: APILogDAO;
 
@@ -43,7 +46,7 @@ class RequestLogQueue {
     const endpointsMap: { [key: string]: any } = {};
 
     batch.forEach((requestLog) => {
-      const url = requestLog.url;
+      const url = requestLog.url + '#' + requestLog.method;
 
       if (!endpointsMap.hasOwnProperty(url)) {
         endpointsMap[url] = {
@@ -68,71 +71,84 @@ class RequestLogQueue {
       `RequestLogManager -> saveRequestLogBatch: ${JSON.stringify(batch)}`
     );
 
-    const { endpointRecordMap, endpointRecords } =
-      this.getEndpointsRecordsForBatch(batch);
-
-    const session = await MongooseClient.connection?.startSession();
-
     try {
-      session!.startTransaction();
+      if (UserAccountService.getProperties().serviceKey) {
 
-      const endpointResp = await Promise.all(
-        endpointRecords.map((record) =>
-          this.endpointDAO.upsert(
-            { url: record.url, microserviceId: record.microserviceId },
-            {
-              $inc: {
-                totalResponseTime: record.responseTime,
-                totalInvocationCount: record.totalInvocationCount,
-              },
-              $setOnInsert: {
-                url: record.url,
-                microserviceId: record.microserviceId,
-              },
-            },
-            {
-              upsert: true,
-              new: true,
-              projection: { __v: 0 },
-              setDefaultsOnInsert: true,
-              session,
-            }
-          )
-        )
-      );
+        const { organizationId, projectId, microserviceId, serviceKey } = UserAccountService.getProperties();
+        const url = BASE_URL_SAAS + getSaveLogsEndpoint(organizationId, projectId);
+        const headers = { apiKey: serviceKey }
+        const response = await axiosClient.post(url, batch, headers)
 
-      logger.trace(
-        `RequestLogManager -> saveRequestLogBatch: endpoints records response 
-         ${JSON.stringify(endpointResp)}`
-      );
+        logger.trace("successfully inserted batch");
+      } else {
 
-      //map _id with the endpoints records presenr in current batch
-      endpointResp.forEach(
-        (record) => (endpointRecordMap[record.url] = record)
-      );
+        const { endpointRecordMap, endpointRecords } =
+          this.getEndpointsRecordsForBatch(batch);
 
-      //transform API Log data within a batch to store in db
-      const apiLogList = batch.map((requestLog) => ({
-        endpointId: endpointRecordMap[requestLog.url]._id,
-        ...requestLog,
-      }));
+        const session = await MongooseClient.connection?.startSession();
+        if (!session) throw new Error('Failed to start session');
 
-      logger.trace(
-        `RequestLogManager -> saveRequestLogBatch: apiLogList ${JSON.stringify(
-          apiLogList
-        )}`
-      );
+        session.withTransaction(async () => {
 
-      await this.apiLogDAO.insertMany(apiLogList, { session });
+          const endpointResp = await Promise.all(
+            endpointRecords.map((record) =>
+              this.endpointDAO.upsert(
+                { url: record.url, microserviceId: record.microserviceId },
+                {
+                  $inc: {
+                    totalResponseTime: record.responseTime,
+                    totalInvocationCount: record.totalInvocationCount,
+                  },
+                  $setOnInsert: {
+                    url: record.url,
+                    microserviceId: record.microserviceId,
+                  },
+                },
+                {
+                  upsert: true,
+                  new: true,
+                  projection: { __v: 0 },
+                  setDefaultsOnInsert: true,
+                  // session,
+                }
+              )
+            )
+          );
 
-      session?.commitTransaction();
+          logger.trace(
+            `RequestLogManager -> saveRequestLogBatch: endpoints records response 
+           ${JSON.stringify(endpointResp)}`
+          );
 
-      logger.trace("successfully inserted batch", apiLogList);
+          //map _id with the endpoints records presenr in current batch
+          endpointResp.forEach(
+            (record) => (endpointRecordMap[record.url] = record)
+          );
+
+          //transform API Log data within a batch to store in db
+          const apiLogList = batch.map((requestLog) => ({
+            endpointId: endpointRecordMap[requestLog.url]._id,
+            ...requestLog,
+          }));
+
+          logger.trace(
+            `RequestLogManager -> saveRequestLogBatch: apiLogList ${JSON.stringify(
+              apiLogList
+            )}`
+          );
+
+          await this.apiLogDAO.insertMany(apiLogList);
+
+          logger.trace("successfully inserted batch", apiLogList);
+        })
+
+      }
       cb();
     } catch (err) {
       logger.error(`RequestLogManager -> saveRequestLogBatch:Error`, err);
       cb(err);
     }
+
   }
 
   // check if the Request Log is valid before pushing in queue
