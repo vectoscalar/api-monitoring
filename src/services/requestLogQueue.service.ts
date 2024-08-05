@@ -5,7 +5,7 @@ import { logger, axiosClient } from "../common/services";
 import { RequestLog } from "../types";
 import { APILogDAO, EndpointDAO } from "../dao";
 import { UserAccountService } from './';
-import { BASE_URL_SAAS, getSaveLogsEndpoint } from "../common/constant";
+import { BASE_URL_SAAS, ENDPOINT_LOGS_ROUTE, ORGANIZATIONS_ROUTE, PROJECTS_ROUTE } from "../common/constant";
 
 
 class RequestLogQueue {
@@ -75,9 +75,9 @@ class RequestLogQueue {
       if (UserAccountService.getProperties().serviceKey) {
 
         const { organizationId, projectId, microserviceId, serviceKey } = UserAccountService.getProperties();
-        const url = BASE_URL_SAAS + getSaveLogsEndpoint(organizationId, projectId);
+        const url = BASE_URL_SAAS + `${ORGANIZATIONS_ROUTE}/${organizationId}${PROJECTS_ROUTE}/${projectId}${ENDPOINT_LOGS_ROUTE}`;
         const headers = { apiKey: serviceKey }
-        const response = await axiosClient.post(url, batch, headers)
+        await axiosClient.post(url, batch, headers)
 
         logger.trace("successfully inserted batch");
       } else {
@@ -109,7 +109,6 @@ class RequestLogQueue {
                   new: true,
                   projection: { __v: 0 },
                   setDefaultsOnInsert: true,
-                  // session,
                 }
               )
             )
