@@ -84,7 +84,7 @@ class ProcessManagerService {
           requestHeaderSize: headersSize,
           requestBodySize,
           responseSize,
-          ...(isSuccessfull ? {} : { responseBody: payload })
+          ...(isSuccessfull ? {} : { errorDetails: payload })
         };
 
         logger.info(`[Request ID: ${request.apiMonitoringId}] Processed log: ${JSON.stringify(logObj)}`);

@@ -30,7 +30,7 @@ const apiLogSchema = new Schema({
     requestHeaderSize: { type: Number, required: true },
     requestBodySize: { type: Number, required: true },
     responseSize: { type: Number, required: true },
-    responseBody: { type: JSON }
+    errorDetails: { type: JSON }
 }, {
     timestamps: true
 });
