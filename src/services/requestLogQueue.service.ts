@@ -74,7 +74,7 @@ class RequestLogQueue {
     try {
       if (UserAccountService.getProperties().serviceKey) {
 
-        const { organizationId, projectId, microserviceId, serviceKey } = UserAccountService.getProperties();
+        const { organizationId, projectId, serviceKey } = UserAccountService.getProperties();
         const url = BASE_URL_SAAS + `${ORGANIZATIONS_ROUTE}/${organizationId}${PROJECTS_ROUTE}/${projectId}${ENDPOINT_LOGS_ROUTE}`;
         const headers = { apiKey: serviceKey }
         await axiosClient.post(url, batch, headers)
