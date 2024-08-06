@@ -5,7 +5,6 @@ export interface IOrganization extends Document {
   city?: string;
   state?: string;
   pincode?: string;
-  gst?: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
@@ -16,7 +15,6 @@ const organizationSchema = new Schema<IOrganization>({
   city: { type: String },
   state: { type: String },
   pincode: { type: String },
-  gst: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date, default: null }
