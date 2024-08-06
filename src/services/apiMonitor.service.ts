@@ -23,15 +23,15 @@ export class ApiMonitorService {
         const { organizationId, projectId, microserviceId } = userAccountInfo.data.data;
 
         if (!organizationId || !projectId || !microserviceId) {
-          logger.error('Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.')
-          throw new Error('Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.');
+          logger.error('Plugin initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.')
+          throw new Error('Plugin initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.');
         }
 
         UserAccountService.setProperties(userAccountInfo.data.data, serviceKey);
       } else if (organizationName && projectName && microserviceName) {
 
         if (!mongoUrl) {
-          throw new Error('Database initialization failed. Mongo URL is missing or invalid.');
+          throw new Error('Plugin initialization failed. Mongo URL is missing.');
         }
 
         await MongooseClient.init(mongoUrl);
@@ -42,12 +42,12 @@ export class ApiMonitorService {
           microserviceName
         );
       } else {
-        throw new Error('Either serviceApiKey or all four - organizationName, projectName, microserviceName and mongoUrl - must be provided.');
+        throw new Error('Plugin Initialization failed. Either serviceApiKey or all four - organizationName, projectName, microserviceName and mongoUrl - must be provided.');
       }
 
 
     } catch (err: any) {
-      logger.error('Initialization failed', err);
+      logger.error('Plugin initialization failed', err);
       throw err;
     }
 
