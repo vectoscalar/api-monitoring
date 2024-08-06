@@ -69,7 +69,7 @@ abstract class BaseDAO {
     return this.model.bulkWrite(operations);
   }
 
-  async insertMany(data: any[], options: any) {
+  async insertMany(data: any[], options: any = {}) {
     logger.trace("BaseDAO insertmany", data);
     return this.model.insertMany(data, options);
   }

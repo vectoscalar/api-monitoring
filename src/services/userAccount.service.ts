@@ -10,11 +10,13 @@ export class UserAccountService {
   static organizationId: string;
   static projectId: string;
   static microserviceId: string;
+  static serviceKey: string;
 
-  static setProperties(properties: { organizationId: string, projectId: string, microserviceId: string }) {
+  static setProperties(properties: { organizationId: string, projectId: string, microserviceId: string }, serviceKey: string) {
     UserAccountService.organizationId = properties.organizationId;
     UserAccountService.projectId = properties.projectId;
     UserAccountService.microserviceId = properties.microserviceId;
+    UserAccountService.serviceKey = serviceKey;
   }
 
   static getProperties() {
@@ -22,6 +24,7 @@ export class UserAccountService {
       organizationId: UserAccountService.organizationId,
       projectId: UserAccountService.projectId,
       microserviceId: UserAccountService.microserviceId,
+      serviceKey: UserAccountService.serviceKey
     };
   }
 
