@@ -50,6 +50,8 @@ export class ApiMonitorService {
       logger.error('Initialization failed', err);
       throw err;
     }
+
+    logger.trace('Plugin has been successfully initialized.')
   }
 
 }
