@@ -7,7 +7,7 @@ import { BASE_URL_SAAS, USER_ACCOUNT_INFO_ENDPOINT } from '../common/constant';
 
 export class ApiMonitorService {
 
-  async init(mongoUrl: string | undefined, organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any) {
+  async init(mongoUrl: string | undefined, organizationName: string | undefined, projectName: string | undefined, microserviceName: string | undefined, logLevel: string, serviceKey: string | undefined, queueOptions: any, useLocal: boolean | undefined) {
     try {
       requestLogQueue.init(queueOptions);
 
@@ -27,7 +27,7 @@ export class ApiMonitorService {
           throw new Error('Plugin initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server.');
         }
 
-        UserAccountService.setProperties(userAccountInfo.data.data, serviceKey);
+        UserAccountService.setProperties(userAccountInfo.data.data, serviceKey, useLocal);
       } else if (organizationName && projectName && microserviceName) {
 
         if (!mongoUrl) {
@@ -47,6 +47,10 @@ export class ApiMonitorService {
 
 
     } catch (err: any) {
+      if(err.name && err.name === 'AxiosError') {
+        throw new Error('Service key not found or invalid. Please ensure the provided service key is correct.')
+      }
+
       logger.error('Plugin initialization failed', err);
       throw err;
     }

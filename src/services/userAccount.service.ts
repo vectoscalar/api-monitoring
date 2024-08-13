@@ -11,12 +11,14 @@ export class UserAccountService {
   static projectId: string;
   static microserviceId: string;
   static serviceKey: string;
+  static useLocal: boolean;
 
-  static setProperties(properties: { organizationId: string, projectId: string, microserviceId: string }, serviceKey: string) {
+  static setProperties(properties: { organizationId: string, projectId: string, microserviceId: string }, serviceKey: string, useLocal) {
     UserAccountService.organizationId = properties.organizationId;
     UserAccountService.projectId = properties.projectId;
     UserAccountService.microserviceId = properties.microserviceId;
     UserAccountService.serviceKey = serviceKey;
+    UserAccountService.useLocal = useLocal;
   }
 
   static getProperties() {

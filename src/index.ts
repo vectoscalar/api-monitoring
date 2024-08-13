@@ -24,6 +24,7 @@ interface PluginOptions extends FastifyPluginOptions {
   logLevel?: "trace" | "info" | "error";
   serviceApiKey?: string;
   queueOptions?: Queue.QueueOptions<any, any>;
+  useLocal?: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
     logLevel = "error",
     serviceApiKey,
     queueOptions,
+    useLocal
   } = options;
 
   try {
@@ -56,7 +58,8 @@ async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
       microserviceName,
       logLevel,
       serviceApiKey,
-      queueOptions
+      queueOptions,
+      useLocal
     );
 
     fastifyHookService.setupHooks(fastify);
