@@ -1,20 +1,22 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IAPILog extends Document {
-    endpointId: mongoose.Types.ObjectId;
-    microserviceId: mongoose.Types.ObjectId;
-    projectId: mongoose.Types.ObjectId;
-    organizationId: mongoose.Types.ObjectId;
-    timestamp: Date;
-    responseTime: number;
-    isSuccessfull: boolean;
-    statusCode: number;
-    errorMessage?: string;
-    ipAddress: string;
-    createdAt: Date;
+  endpointId: mongoose.Types.ObjectId;
+  microserviceId: mongoose.Types.ObjectId;
+  projectId: mongoose.Types.ObjectId;
+  organizationId: mongoose.Types.ObjectId;
+  timestamp: Date;
+  responseTime: number;
+  isSuccessfull: boolean;
+  statusCode: number;
+  errorMessage?: string;
+  ipAddress: string;
+  createdAt: Date;
 }
 
-const apiLogSchema = new Schema({
+const apiLogSchema = new Schema(
+  {
+    url: { type: String, required: true },
     endpointId: { type: Schema.Types.ObjectId, required: true },
     microserviceId: { type: Schema.Types.ObjectId, required: true },
     projectId: { type: Schema.Types.ObjectId, required: true },
@@ -30,12 +32,14 @@ const apiLogSchema = new Schema({
     requestHeaderSize: { type: Number, required: true },
     requestBodySize: { type: Number, required: true },
     responseSize: { type: Number, required: true },
-    responseBody: { type: JSON, require: true }
-}, {
-    timestamps: true
-});
+    responseBody: { type: JSON, require: true },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 apiLogSchema.index({ endpointId: 1, timestamp: -1 });
 apiLogSchema.index({ ipAddress: 1 });
 
-export const APILogModel = mongoose.model<IAPILog>('APILog', apiLogSchema);
+export const APILogModel = mongoose.model<IAPILog>("APILog", apiLogSchema);

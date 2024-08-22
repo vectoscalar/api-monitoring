@@ -81,7 +81,7 @@ class UserAccountService {
           organizationId,
           projectId,
           microserviceId,
-          mongoUrl = "mongodb+srv://new-user-mongo:GSW4rJTnWN4E@cluster0.hegrg.mongodb.net/new-db?retryWrites=true&w=majority&appName=Cluster0",
+          mongoUrl = accountInfo.mongoUrl,
         } = userAccountInfo.data.data);
         await MongooseClient.init(mongoUrl!);
       } else {

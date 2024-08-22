@@ -26,12 +26,10 @@ class RequestLogQueue {
     this.requestLogQueue = null;
   }
 
-  init({ queueOptions = {}, lambdaEnv }: any) {
-    queueOptions.batchSize = lambdaEnv ? 1 : queueOptions?.batchSize || 2;
-    this.queueOptions = queueOptions
+  init({ queueOptions, lambdaEnv }: any) {
+    this.queueOptions = queueOptions;
 
-    const { batchSize = 2, batchDelay = 10000, batchDelayTimeout = 10000 } =
-      queueOptions || {};
+    const { batchSize, batchDelay, batchDelayTimeout } = queueOptions;
 
     const mergedQueueOptions = Object.assign(
       {},
@@ -39,17 +37,20 @@ class RequestLogQueue {
       queueOptions
     );
 
-    this.requestLogQueue = new Queue(this.saveRequestLogBatch.bind(this), mergedQueueOptions);
+    this.requestLogQueue = new Queue(
+      this.saveRequestLogBatch.bind(this),
+      mergedQueueOptions
+    );
   }
 
   getEndpointsRecordsForBatch(batch: RequestLog[]) {
     const endpointsMap: { [key: string]: any } = {};
     batch.forEach((requestLog) => {
-      const url = requestLog.url + "#" + requestLog.method;
+      const url = requestLog.routerUrl + "#" + requestLog.method;
 
       if (!endpointsMap.hasOwnProperty(url)) {
         endpointsMap[url] = {
-          url: requestLog.url,
+          url: requestLog.routerUrl,
           method: requestLog.method,
           responseTime: 0,
           totalInvocationCount: 0,
@@ -97,61 +98,69 @@ class RequestLogQueue {
       if (!session) throw new Error("Failed to start session");
 
       session.withTransaction(async () => {
-        const endpointResp = await Promise.all(
-          endpointRecords.map((record) =>
-            this.endpointDAO.upsert(
-              { url: record.url, microserviceId: record.microserviceId },
-              {
-                $inc: {
-                  totalResponseTime: record.responseTime,
-                  totalInvocationCount: record.totalInvocationCount,
+        try {
+          const endpointResp = await Promise.all(
+            endpointRecords.map((record) =>
+              this.endpointDAO.upsert(
+                { url: record.url, microserviceId: record.microserviceId },
+                {
+                  $inc: {
+                    totalResponseTime: record.responseTime,
+                    totalInvocationCount: record.totalInvocationCount,
+                  },
+                  $setOnInsert: {
+                    url: record.url,
+                    microserviceId: record.microserviceId,
+                    method: record.method,
+                  },
                 },
-                $setOnInsert: {
-                  url: record.url,
-                  microserviceId: record.microserviceId,
-                },
-              },
-              {
-                upsert: true,
-                new: true,
-                projection: { __v: 0 },
-                setDefaultsOnInsert: true,
-              }
+                {
+                  upsert: true,
+                  new: true,
+                  projection: { __v: 0 },
+                  setDefaultsOnInsert: true,
+                }
+              )
             )
-          )
-        );
+          );
 
-        logger.trace(
-          `RequestLogManager -> saveRequestLogBatch: endpoints records response 
-           ${JSON.stringify(endpointResp)}`
-        );
+          logger.trace(
+            `RequestLogManager -> saveRequestLogBatch: endpoints records response 
+             ${JSON.stringify(endpointResp)}`
+          );
 
-        //map _id with the endpoints records presenr in current batch
-        endpointResp.forEach(
-          (record) => (endpointRecordMap[record.url] = record)
-        );
+          //map _id with the endpoints records presenr in current batch
+          endpointResp.forEach((record) => {
+            endpointRecordMap[`${record.url}#${record.method}`] = record;
+          });
 
-        //transform API Log data within a batch to store in db
-        const apiLogList = batch.map((requestLog) => ({
-          endpointId: endpointRecordMap[requestLog.url]._id,
-          ...requestLog,
-        }));
+          //transform API Log data within a batch to store in db
+          const apiLogList = batch.map((requestLog) => ({
+            endpointId:
+              endpointRecordMap[`${requestLog.routerUrl}#${requestLog.method}`]
+                ._id,
+            ...requestLog,
+          }));
 
-        logger.trace(
-          `RequestLogManager -> saveRequestLogBatch: apiLogList ${JSON.stringify(
-            apiLogList
-          )}`
-        );
+          logger.trace(
+            `RequestLogManager -> saveRequestLogBatch: apiLogList ${JSON.stringify(
+              apiLogList
+            )}`
+          );
 
-        await this.apiLogDAO.insertMany(apiLogList);
+          await this.apiLogDAO.insertMany(apiLogList);
 
-        logger.trace("successfully inserted batch", apiLogList);
+          logger.trace("successfully inserted batch", apiLogList);
+        } catch (err) {
+          logger.error(` Plugin Error: RequestLogManager -> save metrcis`, err);
+          cb(err);
+        }
       });
-
-      cb();
-    } catch (err) {
-      console.log("hola bhola error", err);
-      logger.error(`RequestLogManager -> saveRequestLogBatch:Error`, err);
+    } catch (err: any) {
+      logger.error(
+        ` Plugin Error: RequestLogManager -> saveRequestLogBatch`,
+        err
+      );
       cb(err);
     }
   }

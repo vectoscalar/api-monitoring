@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { ApiLogService, EndpointService } from "./services";
+import { ApiLogService, EndpointService } from "./src/services";
 
-import {PluginOptions} from "./types"
+import { PluginOptions } from "./src/types";
 
 declare module "api-monitor-plugin" {
   export function apiMonitorPlugin(

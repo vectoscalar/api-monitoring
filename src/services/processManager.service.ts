@@ -82,7 +82,7 @@ class ProcessManagerService {
 
       const logObj = {
         url: request.url,
-        routerPath: request.routerPath,
+        routerUrl: request.routerPath,
         method: request.method,
         statusCode: reply.statusCode,
         organizationId: accountInfo.organizationId,

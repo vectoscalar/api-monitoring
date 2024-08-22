@@ -13,13 +13,13 @@ export interface PluginOptions {
   accountInfo?: AccountInfo;
   logLevel?: "trace" | "info" | "error";
   serviceApiKey?: string;
-  queueOptions?: Queue.QueueOptions<any, any>;
+  queueOptions?: Partial<Queue.QueueOptions<any, any>>;
   lambdaEnv?: boolean;
 }
 
 export type RequestLog = {
   url: string;
-  routerPath: string;
+  routerUrl: string;
   version?: string;
   organizationId: string;
   projectId: string;
