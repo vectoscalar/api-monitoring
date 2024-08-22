@@ -11,12 +11,12 @@ class AxiosService {
   }
 
   private handleSuccess(response: AxiosResponse): AxiosResponse {
-    logger.trace("response", response);
+    // logger.trace("response", response);
     return response;
   }
 
   private handleError = (error: AxiosError): AxiosError | Promise<AxiosError> => {
-    logger.error("handleError", error);
+    // logger.error("handleError", error);
     return Promise.reject(error);
   };
 
