@@ -26,11 +26,12 @@ class RequestLogQueue {
     this.requestLogQueue = null;
   }
 
-  init({ queueOptions, lambdaEnv }: any) {
-    const { batchDelay = 10000, batchDelayTimeout = 10000 } =
-      queueOptions || {};
+  init({ queueOptions = {}, lambdaEnv }: any) {
+    queueOptions.batchSize = lambdaEnv ? 1 : queueOptions?.batchSize || 2;
+    this.queueOptions = queueOptions
 
-    const batchSize = lambdaEnv ? 1 : queueOptions?.batchSize || 2;
+    const { batchSize = 2, batchDelay = 10000, batchDelayTimeout = 10000 } =
+      queueOptions || {};
 
     const mergedQueueOptions = Object.assign(
       {},
@@ -38,12 +39,7 @@ class RequestLogQueue {
       queueOptions
     );
 
-    this.requestLogQueue = new Queue(async () => {
-      if (!lambdaEnv) {
-        return this.saveRequestLogBatch.bind(this);
-      }
-      await this.saveRequestLogBatch.bind(this);
-    }, mergedQueueOptions);
+    this.requestLogQueue = new Queue(this.saveRequestLogBatch.bind(this), mergedQueueOptions);
   }
 
   getEndpointsRecordsForBatch(batch: RequestLog[]) {
