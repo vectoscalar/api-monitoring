@@ -49,11 +49,11 @@ class RequestLogQueue {
   getEndpointsRecordsForBatch(batch: RequestLog[]) {
     const endpointsMap: { [key: string]: any } = {};
     batch.forEach((requestLog) => {
-      const url = requestLog.routerPath + "#" + requestLog.method;
+      const url = requestLog.url + "#" + requestLog.method;
 
       if (!endpointsMap.hasOwnProperty(url)) {
         endpointsMap[url] = {
-          url: requestLog.routerPath,
+          url: requestLog.url,
           method: requestLog.method,
           responseTime: 0,
           totalInvocationCount: 0,
@@ -137,7 +137,7 @@ class RequestLogQueue {
 
         //transform API Log data within a batch to store in db
         const apiLogList = batch.map((requestLog) => ({
-          endpointId: endpointRecordMap[requestLog.routerPath]._id,
+          endpointId: endpointRecordMap[requestLog.url]._id,
           ...requestLog,
         }));
 
