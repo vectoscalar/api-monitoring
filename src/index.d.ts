@@ -1,21 +1,13 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import { ApiLogService, EndpointService } from "./services";
 
-interface PluginOptions extends FastifyPluginOptions {
-  mongoUrl: string;
-  organizationName: string;
-  projectName: string;
-  microserviceName: string;
-  gst: string;
-  logLevel?: 'trace' | 'info';
-}
+import {PluginOptions} from "./types"
 
-declare module "my-fastify-plugin" {
+declare module "api-monitor-plugin" {
   export function apiMonitorPlugin(
     fastify: FastifyInstance,
     options: PluginOptions
   ): Promise<void>;
 
-  export { ApiLogService, EndpointService };
-
+  export { ApiLogService, EndpointService, PluginOptions };
 }

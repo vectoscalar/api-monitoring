@@ -1,5 +1,5 @@
-import { UserAccountService } from './index';
-import { EndpointDAO } from '../dao';
+import { userAccountService } from "./index";
+import { EndpointDAO } from "../dao";
 
 export class EndpointService {
   private endpointDAO: EndpointDAO;
@@ -10,11 +10,12 @@ export class EndpointService {
 
   /**
    * Method to retrieve list of endpoints of a microserviceId.
-   * @param microServiceId 
-   * @returns 
+   * @param microServiceId
+   * @returns
    */
   async getALLEndpointsByMicroserviceId() {
-    return this.endpointDAO.getALLEndpointsByMicroserviceId(UserAccountService.microserviceId);
+    return this.endpointDAO.getALLEndpointsByMicroserviceId(
+      userAccountService.getAccountInfo().microserviceId
+    );
   }
-
 }

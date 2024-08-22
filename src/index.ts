@@ -1,73 +1,54 @@
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
+import { FastifyInstance } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
-import { logger } from "./common/services";
+import { logger, requestLogQueue } from "./common/services";
 
 import {
-  apiMonitorService,
   EndpointService,
   ApiLogService,
   FastifyHookService,
+  userAccountService,
 } from "./services";
 
-import Queue from "better-queue";
-
-interface AccountInfo {
-  mongoUrl: string;
-  organizationName: string;
-  projectName: string;
-  microserviceName: string;
-}
-
-interface PluginOptions extends FastifyPluginOptions {
-  accountInfo?: AccountInfo;
-  logLevel?: "trace" | "info" | "error";
-  serviceApiKey?: string;
-  queueOptions?: Queue.QueueOptions<any, any>;
-}
+import { PluginOptions } from "./types";
 
 /**
  * Plugin
- *
  * @param fastify
  * @param options
  */
-async function ApiMonitor(fastify: FastifyInstance, options: PluginOptions) {
-
-  const {
-    accountInfo: {
-      mongoUrl,
-      organizationName,
-      projectName,
-      microserviceName
-    } = {},
-    logLevel = "error",
-    serviceApiKey,
-    queueOptions,
-  } = options;
-
+async function initServices(options: PluginOptions) {
   try {
-    const fastifyHookService = new FastifyHookService();
+    requestLogQueue.init(options);
 
-    await apiMonitorService.init(
-      mongoUrl,
-      organizationName,
-      projectName,
-      microserviceName,
-      logLevel,
-      serviceApiKey,
-      queueOptions
-    );
-
-    fastifyHookService.setupHooks(fastify);
-
+    await userAccountService.init(options);
   } catch (err: any) {
-    logger.error("Error occured", err.message);
+    console.log("error", err);
+    logger.error("initServices failed:");
     throw err;
   }
 }
 
-const apiMonitorPlugin = fastifyPlugin(ApiMonitor);
+const apiMonitor = async (fastify: FastifyInstance, options: PluginOptions) => {
+  try {
+    options.lambdaEnv = options.lambdaEnv ?? false;
+
+    logger.init(options.logLevel || "error");
+
+    await initServices(options);
+
+    //init fastify hooks
+    new FastifyHookService().setupHooks(fastify, {
+      lambdaEnv: options.lambdaEnv,
+    });
+  } catch (err: any) {
+    logger.error("Error occured in api monitor plugin", err);
+    throw err;
+  }
+};
+
+const apiMonitorPlugin = fastifyPlugin(apiMonitor);
+
 export default apiMonitorPlugin;
 
 export { ApiLogService, EndpointService };

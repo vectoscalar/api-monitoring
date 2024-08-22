@@ -1,19 +1,44 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { processManagerService } from './';
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { processManagerService } from "./";
 
 export class FastifyHookService {
+  setupHooks(fastifyInstance: FastifyInstance, { lambdaEnv }: any) {
+    fastifyInstance.addHook(
+      "onRequest",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        console.log(`FastifyHookService: isLambda: ${lambdaEnv}`);
+        if (lambdaEnv) {
+          await processManagerService.onRequestHandler(request);
+        } else {
+          setImmediate(() => processManagerService.onRequestHandler(request));
+        }
+      }
+    );
 
-  setupHooks(fastifyInstance: FastifyInstance) {
-    fastifyInstance.addHook("onRequest", async (request: FastifyRequest, reply: FastifyReply) => {
-      processManagerService.onRequestHander(request)
-    });
+    fastifyInstance.addHook(
+      "onResponse",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        if (lambdaEnv) {
+          await processManagerService.onResponseHandler(request, reply);
+        } else {
+          setImmediate(() =>
+            processManagerService.onResponseHandler(request, reply)
+          );
+        }
+      }
+    );
 
-    fastifyInstance.addHook("onResponse", async (request: FastifyRequest, reply: FastifyReply) => {
-      processManagerService.onResponseHandler(request, reply);
-    });
-
-    fastifyInstance.addHook("onSend", async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
-      processManagerService.onSendHandler(request, reply, payload);
-    });
+    fastifyInstance.addHook(
+      "onSend",
+      async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
+        if (lambdaEnv) {
+          await processManagerService.onSendHandler(request, reply, payload);
+        } else {
+          setImmediate(() =>
+            processManagerService.onSendHandler(request, reply, payload)
+          );
+        }
+      }
+    );
   }
 }

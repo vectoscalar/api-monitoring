@@ -1,4 +1,4 @@
-import pino, { Logger as PinoLogger } from 'pino';
+import pino, { Logger as PinoLogger } from "pino";
 
 export class Logger {
   logger: any;
@@ -8,34 +8,38 @@ export class Logger {
   }
 
   init(level: string) {
-    this.logger = pino({
-      name: 'ApiMonitor',
-      level,
-      transport: {
-        target: 'pino/file',
-        options: {
-          ignore: 'pid,hostname,name',
+    try {
+      this.logger = pino({
+        name: "ApiMonitor",
+        level,
+        transport: {
+          target: "pino/file",
+          options: {
+            ignore: "pid,hostname,name",
+          },
         },
-      },
-      redact: ['req.headers.authorization'],
-      serializers: {
-        res(reply) {
-          // The default
-          return {
-            statusCode: reply.statusCode,
-          };
+        redact: ["req.headers.authorization"],
+        serializers: {
+          res(reply) {
+            // The default
+            return {
+              statusCode: reply.statusCode,
+            };
+          },
+          req(request) {
+            return {
+              method: request.method,
+              url: request.url,
+              path: request.routerPath,
+              parameters: request.params, // Including the headers in the log could be in violation // of privacy laws, e.g. GDPR. using the "redact" option to // remove sensitive fields. It could also leak authentication data in // the logs.
+              headers: request.headers,
+            };
+          },
         },
-        req(request) {
-          return {
-            method: request.method,
-            url: request.url,
-            path: request.routerPath,
-            parameters: request.params, // Including the headers in the log could be in violation // of privacy laws, e.g. GDPR. using the "redact" option to // remove sensitive fields. It could also leak authentication data in // the logs.
-            headers: request.headers,
-          };
-        },
-      },
-    });
+      });
+    } catch (err) {
+      console.log("failed to init logger", err);
+    }
   }
 
   info(...message: any) {
