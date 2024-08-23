@@ -119,7 +119,6 @@ class SystemMetrics {
         await this.systemmetricsDao.create(data);
 
         logger.trace("successfully inserted");
-
         // }
 
 
