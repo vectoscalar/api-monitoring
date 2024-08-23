@@ -11,6 +11,7 @@ import {
 } from "./src/services";
 
 import { PluginOptions } from "./src/types";
+import { systemMetrics } from "./src/services/system.metrics";
 
 class APIMonitorPlugin {
   options: PluginOptions;
@@ -68,6 +69,10 @@ class APIMonitorPlugin {
       new FastifyHookService().setupHooks(fastify, {
         lambdaEnv: options.lambdaEnv,
       });
+
+      if(!options.lambdaEnv) {
+        systemMetrics.startMonitoring()
+      }
     } catch (err: any) {
       logger.error("Error occured in api monitor plugin", err);
       throw err;

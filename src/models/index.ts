@@ -4,6 +4,7 @@ import { OrganizationModel } from "./organization.model";
 import { MicroserviceModel } from "./microservice.model";
 import { APILogModel } from './apiLogs.model';
 import { EndpointModel } from './endpoint.model';
+import { SystemMetricsModel } from './systemMetrics.model';
 export {
   UserModel,
   ProjectModel,
@@ -11,4 +12,5 @@ export {
   MicroserviceModel,
   APILogModel,
   EndpointModel,
+  SystemMetricsModel
 };
