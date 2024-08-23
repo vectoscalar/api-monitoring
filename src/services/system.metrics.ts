@@ -110,15 +110,12 @@ class SystemMetrics {
         /** NOTE: commented below code for internal use only
            metrics are saved by making axios call but commented to save cost for */
         // if (serviceKey) {
-
         //   const url = BASE_URL_SAAS + `${ORGANIZATIONS_ROUTE}/${organizationId}${PROJECTS_ROUTE}/${projectId}${SYSTEM_METRICS_ROUTE}`;
         //   const headers = { apiKey: serviceKey }
-
         //   await axiosClient.post(url, data, headers)
 
         //   logger.trace("successfully inserted");
         // } else {
-
         await this.systemmetricsDao.create(data);
 
         logger.trace("successfully inserted");
