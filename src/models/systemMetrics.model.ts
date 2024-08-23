@@ -41,7 +41,6 @@ const systemMetricsSchema = new Schema({
   diskUsage: { type: [diskUsageSchema], required: true },
   timestamp: { type: Date, default: Date.now, required: true },
   instanceId: { type: String, required: true },
-  // instanceId: { type: String, default: null },
   microserviceId: { type: Schema.Types.ObjectId, required: true }
 }, {
   timestamps: true
