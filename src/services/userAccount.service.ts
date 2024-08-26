@@ -1,5 +1,5 @@
 import { ProjectDAO, OrganizationDAO, MicroserviceDAO } from "../dao";
-import { MongooseClient } from "../clients/mongoClient";
+import { APIMonitorMongooseClient } from "../clients/mongoClient";
 import { axiosClient } from "../common/services";
 import { BASE_URL_SAAS, USER_ACCOUNT_INFO_ENDPOINT } from "../common/constant";
 import { logger } from "../common/services";
@@ -83,12 +83,12 @@ class UserAccountService {
           microserviceId,
           mongoUrl = accountInfo.mongoUrl,
         } = userAccountInfo.data.data);
-        await MongooseClient.init(mongoUrl!);
+        await APIMonitorMongooseClient.init(mongoUrl!);
       } else {
         const { organizationName, projectName, microserviceName } = accountInfo;
         mongoUrl = accountInfo.mongoUrl;
 
-        await MongooseClient.init(mongoUrl!);
+        await APIMonitorMongooseClient.init(mongoUrl!);
 
         ({ organizationId, projectId, microserviceId } =
           await this.createUserAccount(

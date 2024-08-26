@@ -33,6 +33,7 @@ const apiLogSchema = new Schema(
     requestBodySize: { type: Number, required: true },
     responseSize: { type: Number, required: true },
     responseBody: { type: JSON, require: true },
+    errorDetails: { type: String },
   },
   {
     timestamps: true,

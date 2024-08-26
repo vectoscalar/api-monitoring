@@ -19,7 +19,9 @@ export class FastifyHookService {
       "onResponse",
       async (request: FastifyRequest, reply: FastifyReply) => {
         if (lambdaEnv) {
-          await processManagerService.onResponseHandler(request, reply);
+          await processManagerService.onResponseHandler(request, reply, {
+            lambdaEnv,
+          });
         } else {
           setImmediate(() =>
             processManagerService.onResponseHandler(request, reply)
