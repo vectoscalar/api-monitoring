@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IMemoryUsage {
-  rss: string;
+  memoryInUse: string;
   heapTotal: string;
   heapUsed: string;
   external: string;
@@ -23,7 +23,7 @@ export interface ISystemMetrics extends Document {
 }
 
 const memoryUsageSchema = new Schema<IMemoryUsage>({
-  rss: { type: String, required: true },
+  memoryInUse: { type: String, required: true },
   heapTotal: { type: String, required: true },
   heapUsed: { type: String, required: true },
   external: { type: String, required: true }

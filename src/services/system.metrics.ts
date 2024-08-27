@@ -1,7 +1,9 @@
+import { execSync } from 'child_process';
+
 import { axiosClient, logger } from "../common/services";
 import { BASE_URL_SAAS, ORGANIZATIONS_ROUTE, PROJECTS_ROUTE, ENDPOINT_LOGS_ROUTE, SYSTEM_METRICS_ROUTE, EC2_METADATA_URL } from "../common/constant";
 import { userAccountService } from "./userAccount.service";
-import { SystemMetricsDAO } from "../dao";
+import { SystemMetricsDAO, InstanceDAO } from "../dao";
 
 const os = require('os');
 const checkDiskSpace = require('check-disk-space').default;
@@ -9,9 +11,11 @@ const checkDiskSpace = require('check-disk-space').default;
 
 class SystemMetrics {
   private systemmetricsDao: SystemMetricsDAO;
+  private instanceDao: InstanceDAO;
 
   constructor() {
     this.systemmetricsDao = new SystemMetricsDAO();
+    this.instanceDao = new InstanceDAO();
   }
 
   getCurrentCpuUsage() {
@@ -52,7 +56,7 @@ class SystemMetrics {
   getMemoryUsage() {
     const memoryUsage = process.memoryUsage();
     return {
-      rss: memoryUsage.rss / (1024 * 1024) + ' MB',
+      memoryInUse: memoryUsage.rss / (1024 * 1024) + ' MB',
       heapTotal: memoryUsage.heapTotal / (1024 * 1024) + ' MB',
       heapUsed: memoryUsage.heapUsed / (1024 * 1024) + ' MB',
       external: memoryUsage.external / (1024 * 1024) + ' MB',
@@ -63,8 +67,10 @@ class SystemMetrics {
     const drives = os.platform() === 'win32' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(d => d + ':\\') : ['/'];
 
     const results: any = [];
+    const osPlatform = os.platform();
 
-    if (os.platform() === 'win32') {
+    /** Ensuring the PowerShell path is included in the environment’s PATH variable for windows. */
+    if (osPlatform === 'win32') {
       const powershellPath = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0';
       if (!process.env.PATH?.includes(powershellPath)) {
         process.env.PATH = `${process.env.PATH};${powershellPath}`;
@@ -73,11 +79,31 @@ class SystemMetrics {
 
     for (const drive of drives) {
       try {
-        const diskSpace = await checkDiskSpace(drive);
+        let diskSpace;
+        if (osPlatform === 'win32') {
+          diskSpace = await checkDiskSpace(drive);
+
+          diskSpace = {
+            free: diskSpace.free / (1024 * 1024 * 1024), /* Convert bytes to GB */
+            size: diskSpace.size / (1024 * 1024 * 1024)
+          };
+        }
+        else if (osPlatform === 'linux' || osPlatform === 'darwin') { /* 'darwin' is for macOS */
+          /* For Linux and macOS, we use the 'df' command to get disk space */
+          const output = execSync(`df -h ${drive}`).toString();
+          const lines = output.split('\n');
+          const data = lines[1].split(/\s+/);
+          diskSpace = {
+            free: parseFloat(data[3]), /* In GB */
+            size: parseFloat(data[1])
+          };
+        }
+
+
         results.push({
-          drive: drive,
-          free: (diskSpace.free / (1024 * 1024 * 1024)).toFixed(2) + ' GB',
-          size: (diskSpace.size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
+          drive,
+          free: `${diskSpace.free.toFixed(2)} GB`,
+          size: `${diskSpace.size.toFixed(2)} GB`
         });
       } catch (error) {
         /* Ignore if the drive does not exist */
@@ -88,9 +114,20 @@ class SystemMetrics {
   }
 
   async startMonitoring() {
-    // const instanceId = await this.getInstanceId()    Can only be invoked inside an EC2 instance
-    const instanceId = ''
+    const isEc2Res:any = await this.isEC2();
+    const provider = isEc2Res ? 'aws' : 'local';
+    let machineId: string;
+
+    if (provider === 'local') {
+      machineId = os.hostname() + os.platform() + os.arch();
+    } else {
+      machineId = isEc2Res[0];
+    }
+
     const { organizationId, projectId, microserviceId, serviceKey } = userAccountService.getAccountInfo();
+    
+    /* Upsert machine Id */
+    await this.instanceDao.upsertInstance(microserviceId, machineId)
 
     while (true) {
       try {
@@ -103,7 +140,7 @@ class SystemMetrics {
           memoryUsage,
           diskUsage,
           timestamp: new Date(),
-          instanceId,
+          instanceId: machineId,
           microserviceId
         };
 
@@ -131,13 +168,23 @@ class SystemMetrics {
     }
   }
 
-  async getInstanceId() {
-    try {
-      const instanceId = await axiosClient.get(EC2_METADATA_URL);
-      logger.trace(`Instance ID: ${instanceId}`);
-    } catch (error) {
-      logger.error('Error fetching instance ID:', error);
+  async isEC2(retries = 3) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await axiosClient.get(EC2_METADATA_URL, { timeout: '1000' });
+        if (response.status === 200) {
+          return [response];
+        }
+      } catch (error) {
+        if (i === retries - 1) {
+          return false;
+        }
+
+        /* Retry after a second*/
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
     }
+    return false;
   }
 
 }

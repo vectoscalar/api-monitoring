@@ -1,6 +1,6 @@
 import { APILogDAO } from "../dao";
-import { ObjectId } from "mongodb";
-import { AvergaResponseFilter, InvocationFilter,  } from "../types/index";
+import { Types } from "mongoose";
+import { AvergaResponseFilter, InvocationFilter } from "../types/index";
 
 export class ApiLogService {
   private apiLogDAO: APILogDAO;
@@ -15,16 +15,13 @@ export class ApiLogService {
     limit: number,
     offset: number
   ) {
-
     let query: any = {};
 
     const { period, ipAddress } = filter;
 
-    if (!endpointId) 
-      throw new Error("Endpoint ID must be provided");
+    if (!endpointId) throw new Error("Endpoint ID must be provided");
 
     query.endpointId = endpointId;
-
 
     if (ipAddress) query.ipAddress = ipAddress;
 
@@ -68,29 +65,31 @@ export class ApiLogService {
     return { startDate, endDate };
   }
 
-  async getAverageResponseTime(endpointId: string,filter: AvergaResponseFilter) {
-    const {period } =
-      filter;
+  async getAverageResponseTime(
+    endpointId: string,
+    filter: AvergaResponseFilter
+  ) {
+    const { period } = filter;
     let query: any = {};
 
-    if (!endpointId) 
-      throw new Error("Endpoint ID must be provided");
+    if (!endpointId) throw new Error("Endpoint ID must be provided");
 
-    query.endpointId = new ObjectId(endpointId);
-   
+    query.endpointId = new Types.ObjectId(endpointId);
+
     if (period) {
       const { startDate, endDate } = this.getPeriodDateRange(period);
       query.timestamp = { $gte: startDate, $lte: endDate };
     }
 
-
     return await this.apiLogDAO.getAverageResponseTimeByFilters(query);
   }
 
-  async getMinResponseTime(endpointId: string, timePeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly') {
-
-    let query: any = { 
-      endpointId : new ObjectId(endpointId),
+  async getMinResponseTime(
+    endpointId: string,
+    timePeriod?: "daily" | "weekly" | "monthly" | "yearly"
+  ) {
+    let query: any = {
+      endpointId: new Types.ObjectId(endpointId),
       isSuccessfull: true,
     };
 
@@ -102,10 +101,12 @@ export class ApiLogService {
     return await this.apiLogDAO.getMinResponseTime(query);
   }
 
-  async getMaxResponseTime(endpointId: string, timePeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly',) {
-
-    let query: any = { 
-      endpointId : new ObjectId(endpointId),
+  async getMaxResponseTime(
+    endpointId: string,
+    timePeriod?: "daily" | "weekly" | "monthly" | "yearly"
+  ) {
+    let query: any = {
+      endpointId: new Types.ObjectId(endpointId),
       isSuccessfull: true,
     };
 

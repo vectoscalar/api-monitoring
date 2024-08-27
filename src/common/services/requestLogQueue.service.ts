@@ -1,6 +1,6 @@
 import Queue from "better-queue";
 import { requestLogSchema } from "../../joi-schema";
-import { MongooseClient } from "../../clients/mongoClient";
+import { APIMonitorMongooseClient } from "../../clients/mongoClient";
 import { logger, axiosClient } from "../services";
 import { RequestLog } from "../../types";
 import { APILogDAO, EndpointDAO } from "../../dao";
@@ -12,7 +12,7 @@ import {
   PROJECTS_ROUTE,
 } from "../../common/constant";
 
-class RequestLogQueue {
+export class RequestLogQueue {
   private static instance: RequestLogQueue | null = null;
   private requestLogQueue: Queue | null;
   private queueOptions: Partial<Queue.QueueOptions<any, any>> | null;
@@ -46,19 +46,21 @@ class RequestLogQueue {
   getEndpointsRecordsForBatch(batch: RequestLog[]) {
     const endpointsMap: { [key: string]: any } = {};
     batch.forEach((requestLog) => {
-      const url = requestLog.routerUrl + "#" + requestLog.method;
+      const url = requestLog.routerUrl || requestLog.url;
+      const key = `${url}#${requestLog.method}`;
 
       if (!endpointsMap.hasOwnProperty(url)) {
-        endpointsMap[url] = {
-          url: requestLog.routerUrl,
+        endpointsMap[key] = {
+          url,
           method: requestLog.method,
           responseTime: 0,
           totalInvocationCount: 0,
           microserviceId: requestLog.microserviceId,
+          isRouteAvailable: requestLog.routerUrl ? true : false,
         };
       }
-      endpointsMap[url].responseTime += requestLog.responseTime;
-      endpointsMap[url].totalInvocationCount += 1;
+      endpointsMap[key].responseTime += requestLog.responseTime;
+      endpointsMap[key].totalInvocationCount += 1;
     });
     return {
       endpointRecordMap: endpointsMap,
@@ -94,7 +96,7 @@ class RequestLogQueue {
       const { endpointRecordMap, endpointRecords } =
         this.getEndpointsRecordsForBatch(batch);
 
-      const session = await MongooseClient.connection?.startSession();
+      const session = await APIMonitorMongooseClient.connection?.startSession();
       if (!session) throw new Error("Failed to start session");
 
       session.withTransaction(async () => {
@@ -112,6 +114,7 @@ class RequestLogQueue {
                     url: record.url,
                     microserviceId: record.microserviceId,
                     method: record.method,
+                    isRouteAvailable: record.isRouteAvailable,
                   },
                 },
                 {
@@ -137,8 +140,9 @@ class RequestLogQueue {
           //transform API Log data within a batch to store in db
           const apiLogList = batch.map((requestLog) => ({
             endpointId:
-              endpointRecordMap[`${requestLog.routerUrl}#${requestLog.method}`]
-                ._id,
+              endpointRecordMap[
+                `${requestLog.routerUrl || requestLog.url}#${requestLog.method}`
+              ]._id,
             ...requestLog,
           }));
 
