@@ -55,11 +55,15 @@ class SystemMetrics {
 
   getMemoryUsage() {
     const memoryUsage = process.memoryUsage();
+    const { rss, heapTotal, heapUsed, external } = memoryUsage;
+    const percentage = ((heapUsed + external) / rss) * 100
+
     return {
-      memoryInUse: memoryUsage.rss / (1024 * 1024) + ' MB',
-      heapTotal: memoryUsage.heapTotal / (1024 * 1024) + ' MB',
-      heapUsed: memoryUsage.heapUsed / (1024 * 1024) + ' MB',
-      external: memoryUsage.external / (1024 * 1024) + ' MB',
+      memoryInUse: rss / (1024 * 1024) + ' MB',
+      heapTotal: heapTotal / (1024 * 1024) + ' MB',
+      heapUsed: heapUsed / (1024 * 1024) + ' MB',
+      external: external / (1024 * 1024) + ' MB',
+      percentage: percentage.toFixed(2)  + '%'
     };
   }
 
@@ -100,10 +104,14 @@ class SystemMetrics {
         }
 
 
+        const { free, size } = diskSpace;
+        const percentage = ((size - free)/ size) * 100;
+
         results.push({
           drive,
-          free: `${diskSpace.free.toFixed(2)} GB`,
-          size: `${diskSpace.size.toFixed(2)} GB`
+          free: `${free.toFixed(2)} GB`,
+          size: `${size.toFixed(2)} GB`,
+          percentage: percentage.toFixed(2) + '%'
         });
       } catch (error) {
         /* Ignore if the drive does not exist */

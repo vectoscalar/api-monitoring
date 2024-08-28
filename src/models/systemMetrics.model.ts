@@ -5,12 +5,14 @@ export interface IMemoryUsage {
   heapTotal: string;
   heapUsed: string;
   external: string;
+  percentage: string;
 }
 
 export interface IDiskUsage {
   drive: string;
   free: string;
   size: string;
+  percentage: string;
 }
 
 export interface ISystemMetrics extends Document {
@@ -26,13 +28,15 @@ const memoryUsageSchema = new Schema<IMemoryUsage>({
   memoryInUse: { type: String, required: true },
   heapTotal: { type: String, required: true },
   heapUsed: { type: String, required: true },
-  external: { type: String, required: true }
+  external: { type: String, required: true },
+  percentage: { type: String, required: true }
 }, { _id: false });
 
 const diskUsageSchema = new Schema<IDiskUsage>({
   drive: { type: String, required: true },
   free: { type: String, required: true },
-  size: { type: String, required: true }
+  size: { type: String, required: true },
+  percentage: { type: String, required: true }
 }, { _id: false });
 
 const systemMetricsSchema = new Schema({
