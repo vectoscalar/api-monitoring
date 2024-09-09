@@ -1,0 +1,32 @@
+{
+  "type": "module",
+  "name": "@siddharth-satija-vs/api-monitor-plugin",
+  "version": "1.0.3",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "exit 0",
+    "buildjs": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "better-queue": "^3.8.12",
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
+    "joi": "^17.13.3",
+    "mongoose": "^8.5.1",
+    "uuid": "^10.0.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/better-queue": "^3.8.6",
+    "@types/uuid": "^10.0.0"
+  },
+  "publishConfig": {
+    "@siddharth-satija-vs:registry": "https://npm.pkg.github.com"
+  }
+}
