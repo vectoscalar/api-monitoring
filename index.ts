@@ -1,86 +1,69 @@
 import { FastifyInstance } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
-import { logger, requestLogQueue } from "./src/common/services";
+import { logger, RequestLogQueue } from "./src/common/services";
 
 import {
   EndpointService,
   ApiLogService,
-  FastifyHookService,
-  userAccountService,
+  UserAccountService,
+  LambdaService,
+  EC2Service,
 } from "./src/services";
 
+import { DEFAULT_PLUGIN_OPTIONS } from "./src/common/constant";
 import { PluginOptions } from "./src/types";
+import { APIMonitorMongooseClient } from "./src/clients/mongoClient";
 
 class APIMonitorPlugin {
   options: PluginOptions;
 
-  constructor() {
-    this.options = {
-      lambdaEnv: false,
-
-      queueOptions: {
-        batchSize: 2,
-        batchDelay: 10000,
-        batchDelayTimeout: 10000,
-      },
-      logLevel: "error",
-      accountInfo: undefined,
-      serviceApiKey: undefined,
-    };
-  }
-
-  setOptions(options: PluginOptions) {
+  constructor(options: PluginOptions) {
     this.options = {
       ...options,
       lambdaEnv: options.lambdaEnv ?? false,
-
       queueOptions: {
-        ...this.options.queueOptions,
-        batchSize: options.lambdaEnv
-          ? 1
-          : options.queueOptions?.batchSize ||
-            this.options.queueOptions?.batchSize,
+        ...DEFAULT_PLUGIN_OPTIONS.queueOptions,
       },
+      logLevel: options.logLevel || "error",
     };
   }
 
-  async initServices() {
+  async initServices(fastify: FastifyInstance) {
     try {
-      requestLogQueue.init(this.options);
+      logger.init(this.options.logLevel);
 
-      await userAccountService.init(this.options);
-    } catch (err: any) {
-      logger.error("initServices failed:");
-      throw err;
-    }
-  }
+      const { serviceApiKey, accountInfo, lambdaEnv } = this.options;
 
-  async init(fastify: FastifyInstance, options: PluginOptions) {
-    try {
-      this.setOptions(options);
-
-      logger.init(this.options.logLevel!);
-
-      await this.initServices();
-
-      //init fastify hooks
-      new FastifyHookService().setupHooks(fastify, {
-        lambdaEnv: options.lambdaEnv,
+      await APIMonitorMongooseClient.initConnection({
+        serviceApiKey,
+        accountInfo,
       });
-    } catch (err: any) {
-      logger.error("Error occured in api monitor plugin", err);
+
+      UserAccountService.getInstance()!.setupUserAccountInfo({
+        serviceApiKey,
+        accountInfo,
+      });
+
+      const serviceInstance = lambdaEnv
+        ? new LambdaService()
+        : new EC2Service();
+
+      serviceInstance.setupHooks(fastify);
+
+      RequestLogQueue.getInstance()!.init(this.options);
+    } catch (err) {
+      logger.error(
+        `APIMonitorPlugin : initServices failed: ${JSON.stringify(err)}`
+      );
       throw err;
     }
   }
 }
-
-const pluginInstance = new APIMonitorPlugin();
-
-const apiMonitorPlugin = fastifyPlugin(
-  pluginInstance.init.bind(pluginInstance)
-);
-
+const apiMonitorPlugin = fastifyPlugin(async (fastify, options) => {
+  const pluginInstance = new APIMonitorPlugin(options);
+  await pluginInstance.initServices(fastify);
+});
 export default apiMonitorPlugin;
 
 export { ApiLogService, EndpointService };

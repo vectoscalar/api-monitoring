@@ -1,10 +1,15 @@
 import { ProjectDAO, OrganizationDAO, MicroserviceDAO } from "../dao";
 import { APIMonitorMongooseClient } from "../clients/mongoClient";
 import { axiosClient } from "../common/services";
-import { BASE_URL_SAAS, USER_ACCOUNT_INFO_ENDPOINT } from "../common/constant";
+import {
+  BASE_URL_SAAS,
+  USER_ACCOUNT_INFO_ENDPOINT,
+  DEFAULT_MONGO_URL,
+} from "../common/constant";
 import { logger } from "../common/services";
 
-class UserAccountService {
+export class UserAccountService {
+  private static instance: UserAccountService | null = null;
   private projectDAO: ProjectDAO;
   private organizationDAO: OrganizationDAO;
   private microserviceDAO: MicroserviceDAO;
@@ -15,13 +20,20 @@ class UserAccountService {
   static serviceKey: string;
   static mongoUrl: string;
 
-  constructor() {
+  private constructor() {
     this.projectDAO = new ProjectDAO();
     this.organizationDAO = new OrganizationDAO();
     this.microserviceDAO = new MicroserviceDAO();
   }
 
-  getAccountInfo() {
+  static getInstance() {
+    if (!UserAccountService.instance) {
+      this.instance = new UserAccountService();
+    }
+    return this.instance;
+  }
+
+  static getAccountInfo() {
     return {
       organizationId: UserAccountService.organizationId,
       projectId: UserAccountService.projectId,
@@ -29,6 +41,65 @@ class UserAccountService {
       serviceKey: UserAccountService.serviceKey,
       mongoUrl: UserAccountService.mongoUrl,
     };
+  }
+
+  static setAccountInfo(data: {
+    organizationId: string;
+    projectId: string;
+    microserviceId: string;
+    serviceApiKey: string;
+  }) {
+    UserAccountService.organizationId = data.organizationId;
+    UserAccountService.projectId = data.projectId;
+    UserAccountService.microserviceId = data.microserviceId;
+    UserAccountService.serviceKey = data.serviceApiKey;
+  }
+
+  async setupUserAccountInfo({ accountInfo, serviceApiKey }) {
+    let serviceInfo: any;
+    if (
+      accountInfo &&
+      accountInfo.organizationName &&
+      accountInfo.projectName &&
+      accountInfo.microserviceName
+    ) {
+      serviceInfo = await this.createUserAccount(
+        accountInfo.organizationName,
+        accountInfo.projectName,
+        accountInfo.microserviceName
+      );
+    } else if (serviceApiKey) {
+      //NOTE for Internal use only remove this  for external use
+      const microServiceInfo =
+        await this.microserviceDAO.getMicroserviceDetailsByApiKey(
+          serviceApiKey
+        );
+
+      serviceInfo = microServiceInfo[0] || {};
+    }
+    const { organizationId, projectId, microserviceId } = serviceInfo;
+
+    if (!organizationId || !projectId || !microserviceId) {
+      logger.error(
+        "Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server."
+      );
+      throw new Error(
+        "Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server."
+      );
+    }
+
+    UserAccountService.setAccountInfo({
+      organizationId,
+      projectId,
+      microserviceId,
+      serviceApiKey,
+    });
+
+    logger.trace(
+      `UserAccount init completed: ${JSON.stringify(
+        UserAccountService.getAccountInfo()
+      )}`
+    );
   }
 
   async createUserAccount(
@@ -59,84 +130,4 @@ class UserAccountService {
       microserviceId: microservice._id.toString(),
     };
   }
-
-  async init({ serviceApiKey, accountInfo }: any) {
-    try {
-      if (!serviceApiKey && !(accountInfo || accountInfo.mongoUrl)) {
-        throw new Error("pls provide either service api key or account info");
-      }
-
-      let organizationId: null | string = null;
-      let projectId: null | string = null;
-      let microserviceId: null | string = null;
-      let mongoUrl: null | string = null;
-
-      if (serviceApiKey) {
-        const userAccountInfo = await axiosClient.get(
-          BASE_URL_SAAS + USER_ACCOUNT_INFO_ENDPOINT,
-          { apikey: serviceApiKey }
-        );
-
-        ({
-          organizationId,
-          projectId,
-          microserviceId,
-          mongoUrl = accountInfo.mongoUrl,
-        } = userAccountInfo.data.data);
-        await APIMonitorMongooseClient.init(mongoUrl!);
-      } else {
-        const { organizationName, projectName, microserviceName } = accountInfo;
-        mongoUrl = accountInfo.mongoUrl;
-
-        await APIMonitorMongooseClient.init(mongoUrl!);
-
-        ({ organizationId, projectId, microserviceId } =
-          await this.createUserAccount(
-            organizationName,
-            projectName,
-            microserviceName
-          ));
-      }
-
-      if (!organizationId || !projectId || !microserviceId || !mongoUrl) {
-        logger.error(
-          "Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server."
-        );
-        throw new Error(
-          "Initialization failed. Failed to fetch one or more required IDs: organizationId, projectId, or microserviceId from the server."
-        );
-      }
-
-      UserAccountService.setAccountInfo({
-        organizationId,
-        projectId,
-        microserviceId,
-        mongoUrl,
-        serviceApiKey,
-      });
-
-      logger.trace(
-        `UserAccount init completed: ${JSON.stringify(this.getAccountInfo())}`
-      );
-    } catch (err: any) {
-      logger.error("Initialization failed", err);
-      throw err;
-    }
-  }
-
-  static setAccountInfo(data: {
-    mongoUrl: string;
-    organizationId: string;
-    projectId: string;
-    microserviceId: string;
-    serviceApiKey: string;
-  }) {
-    UserAccountService.organizationId = data.organizationId;
-    UserAccountService.projectId = data.projectId;
-    UserAccountService.microserviceId = data.microserviceId;
-    UserAccountService.serviceKey = data.serviceApiKey;
-    UserAccountService.mongoUrl = data.mongoUrl;
-  }
 }
-
-export const userAccountService = new UserAccountService();

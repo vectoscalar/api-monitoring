@@ -6,6 +6,7 @@ export const requestLogSchema = Joi.object({
   projectId: Joi.string().required(),
   url: Joi.string().uri({ relativeOnly: true }).required(),
   method: Joi.string().required(),
+  routerUrl: Joi.string().required(),
   description: Joi.string().optional(),
   statusCode: Joi.number().required(),
   isSuccessfull: Joi.boolean().required(),

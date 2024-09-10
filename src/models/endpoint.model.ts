@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Connection, Document, Schema } from "mongoose";
 
 export interface IEndpoint extends Document {
   microserviceId: mongoose.Types.ObjectId;
@@ -33,7 +33,8 @@ const endpointSchema = new Schema(
 
 endpointSchema.index({ microserviceId: 1, url: 1 });
 
-export const EndpointModel = mongoose.model<IEndpoint>(
-  "Endpoint",
-  endpointSchema
-);
+export const EndpointModel = async (connection: Connection) => {
+  const model = connection.model<IEndpoint>("Endpoint", endpointSchema);
+  await model.init();
+  return model;
+};

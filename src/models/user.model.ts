@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Connection } from "mongoose";
 
 // (optional but recommended for type safety)
 interface IUser extends Document {
@@ -16,5 +16,9 @@ const UserSchema: Schema<IUser> = new Schema({
 });
 
 /* Create and export model based on schema */
-export const UserModel = mongoose.model<IUser>('user', UserSchema);
 
+export const UserModel = async (connection: Connection) => {
+  const model = connection.model<IUser>("user", UserSchema);
+  await model.init();
+  return model;
+};

@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Connection } from "mongoose";
 
 export interface IAPILog extends Document {
   endpointId: mongoose.Types.ObjectId;
@@ -43,4 +43,8 @@ const apiLogSchema = new Schema(
 apiLogSchema.index({ endpointId: 1, timestamp: -1 });
 apiLogSchema.index({ ipAddress: 1 });
 
-export const APILogModel = mongoose.model<IAPILog>("APILog", apiLogSchema);
+export const APILogModel = async (connection: Connection) => {
+  const model = connection.model<IAPILog>("APILog", apiLogSchema);
+  await model.init();
+  return model;
+};

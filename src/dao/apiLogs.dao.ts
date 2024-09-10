@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
+import { APIMonitorMongooseClient } from "../../src/clients/mongoClient";
 import BaseDAO from "../common/base.dao";
 import { APILogModel, IAPILog } from "../models/apiLogs.model";
 
 export class APILogDAO extends BaseDAO {
-  protected readonly model: mongoose.Model<IAPILog>;
+  public readonly model: mongoose.Model<IAPILog>;
 
   constructor() {
-    super(APILogModel);
-    this.model = APILogModel;
+    super(APIMonitorMongooseClient.models.APILogModel);
+    this.model = APIMonitorMongooseClient.models.APILogModel;
   }
 
   async getLatestInvocations(query: any, limit: number, offset: number) {

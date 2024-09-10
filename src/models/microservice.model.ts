@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Connection } from "mongoose";
 
 export interface IMicroservice extends Document {
   projectId: mongoose.Types.ObjectId;
@@ -11,12 +11,18 @@ export interface IMicroservice extends Document {
 
 const microserviceSchema = new Schema({
   projectId: { type: Schema.Types.ObjectId, required: true },
-  apiKey: { type: Schema.Types.ObjectId, },
+  apiKey: { type: Schema.Types.ObjectId },
   name: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  deletedAt: { type: Date, default: null }
+  deletedAt: { type: Date, default: null },
 });
 
-export const MicroserviceModel = mongoose.model<IMicroservice>('Microservice', microserviceSchema);
-
+export const MicroserviceModel = async (connection: Connection) => {
+  const model = connection.model<IMicroservice>(
+    "Microservice",
+    microserviceSchema
+  );
+  await model.init();
+  return model;
+};

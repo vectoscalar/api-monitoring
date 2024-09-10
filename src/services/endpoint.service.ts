@@ -1,4 +1,4 @@
-import { userAccountService } from "./index";
+import { UserAccountService } from "./index";
 import { EndpointDAO } from "../dao";
 
 export class EndpointService {
@@ -15,7 +15,7 @@ export class EndpointService {
    */
   async getALLEndpointsByMicroserviceId() {
     return this.endpointDAO.getALLEndpointsByMicroserviceId(
-      userAccountService.getAccountInfo().microserviceId
+      UserAccountService.getAccountInfo().microserviceId
     );
   }
 }

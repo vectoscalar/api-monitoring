@@ -1,23 +1,16 @@
-import pino, { Logger as PinoLogger } from "pino";
-
+import pino from "pino";
 export class Logger {
-  logger: any;
-
+  logger;
+  level;
   constructor() {
-    this.logger = null;
+    this.level = "info";
+    this.init(this.level);
   }
-
-  init(level: string) {
+  init(level) {
     try {
       this.logger = pino({
         name: "ApiMonitor",
         level,
-        transport: {
-          target: "pino/file",
-          options: {
-            ignore: "pid,hostname,name",
-          },
-        },
         redact: ["req.headers.authorization"],
         serializers: {
           res(reply) {
@@ -31,32 +24,31 @@ export class Logger {
               method: request.method,
               url: request.url,
               path: request.routerPath,
-              parameters: request.params, // Including the headers in the log could be in violation // of privacy laws, e.g. GDPR. using the "redact" option to // remove sensitive fields. It could also leak authentication data in // the logs.
+              parameters: request.params,
               headers: request.headers,
             };
           },
         },
       });
+      this.level = level;
     } catch (err) {
       console.log("failed to init logger", err);
     }
   }
-
-  info(...message: any) {
+  info(...message) {
     this.logger.info(message);
   }
-
-  error(...error: any) {
+  error(...error) {
     this.logger.error(error);
   }
-
-  warn(...message: any) {
+  warn(...message) {
     this.logger.warn(message);
   }
-
-  trace(...message: any) {
+  trace(...message) {
     this.logger.trace(message);
   }
+  getLevel() {
+    return this.level;
+  }
 }
-
 export const logger = new Logger();

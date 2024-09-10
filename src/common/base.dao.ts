@@ -70,7 +70,6 @@ abstract class BaseDAO {
   }
 
   async insertMany(data: any[], options: any = {}) {
-    logger.trace("BaseDAO insertmany", data);
     return this.model.insertMany(data, options);
   }
 }
