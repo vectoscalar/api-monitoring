@@ -155,15 +155,15 @@ export class RequestLogQueue {
           await this.apiLogDAO.insertMany(apiLogList);
 
           logger.trace("successfully inserted batch", apiLogList);
-        } catch (err) {
-          logger.error(` Plugin Error: RequestLogManager -> save metrcis`, err);
+        } catch (err:any) {
+          logger.error(` Plugin Error: RequestLogManager -> save metrcis`, err.message);
           cb(err);
         }
       });
     } catch (err: any) {
       logger.error(
         ` Plugin Error: RequestLogManager -> saveRequestLogBatch`,
-        err
+        err.message
       );
       cb(err);
     }

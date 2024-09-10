@@ -11,12 +11,12 @@ class ProcessManagerService {
   }
 
   async processRequestLogForLambda(logObj: RequestLog) {
-    await RequestLogQueue.validateRequestLog(logObj, (err) => {
+    await RequestLogQueue.validateRequestLog(logObj, (err:any) => {
       logger.info(
         `Plugin: Requestlog Validation Error occured: ${JSON.stringify(err)}`
       );
     });
-    await requestLogQueue.saveRequestLogBatch([logObj], (err) => {
+    await requestLogQueue.saveRequestLogBatch([logObj], (err:any) => {
       logger.info(`Plugin: save metrics error : ${JSON.stringify(err)}`);
     });
   }

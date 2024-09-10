@@ -18,8 +18,8 @@ export namespace APIMonitorMongooseClient {
 
       // Initialize all models
       Object.values(dbModels).forEach((model: any) => model.init());
-    } catch (error) {
-      logger.error("Unable to connect to MongoDB:", error);
+    } catch (error:any) {
+      logger.error("Unable to connect to MongoDB:", error.message);
       throw error;
     }
   }

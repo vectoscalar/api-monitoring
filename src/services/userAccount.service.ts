@@ -119,7 +119,7 @@ class UserAccountService {
         `UserAccount init completed: ${JSON.stringify(this.getAccountInfo())}`
       );
     } catch (err: any) {
-      logger.error("Initialization failed", err);
+      logger.error("Initialization failed", err.message);
       throw err;
     }
   }
