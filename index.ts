@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 
 import { logger, RequestLogQueue } from "./src/common/services";
@@ -60,10 +60,12 @@ class APIMonitorPlugin {
     }
   }
 }
-const apiMonitorPlugin = fastifyPlugin(async (fastify, options) => {
-  const pluginInstance = new APIMonitorPlugin(options);
-  await pluginInstance.initServices(fastify);
-});
+const apiMonitorPlugin: FastifyPluginAsync<PluginOptions> = fastifyPlugin(
+  async (fastify, options) => {
+    const pluginInstance = new APIMonitorPlugin(options);
+    await pluginInstance.initServices(fastify);
+  }
+);
 export default apiMonitorPlugin;
 
 export { ApiLogService, EndpointService };

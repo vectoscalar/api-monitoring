@@ -155,6 +155,7 @@ export class ApiLogService {
         {
           url: record.routerUrl || record.url,
           microserviceId: record.microserviceId,
+          method: record.method,
         },
         {
           $inc: {
@@ -258,7 +259,11 @@ export class ApiLogService {
           const endpointResp = await Promise.all(
             endpointRecords.map(async (record) =>
               this.endpointDAO.upsert(
-                { url: record.url, microserviceId: record.microserviceId },
+                {
+                  url: record.url,
+                  microserviceId: record.microserviceId,
+                  method: record.method,
+                },
                 {
                   $inc: {
                     totalResponseTime: record.responseTime,
