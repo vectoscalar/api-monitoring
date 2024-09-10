@@ -7,7 +7,6 @@ import {
   BASE_URL_SAAS,
   USER_ACCOUNT_INFO_ENDPOINT,
 } from "../common/constant";
-import { UserAccountService } from "src/services";
 
 export namespace APIMonitorMongooseClient {
   export let connection: mongoose.Connection | null = null;
