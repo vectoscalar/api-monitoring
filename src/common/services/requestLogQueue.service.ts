@@ -23,7 +23,7 @@ export class RequestLogQueue {
     return RequestLogQueue.instance;
   }
 
-  init(queueOptions) {
+  init(queueOptions:any) {
     const { batchSize, batchDelay, batchDelayTimeout } = queueOptions;
 
     this.queueOptions = Object.assign(

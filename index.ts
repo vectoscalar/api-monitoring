@@ -14,6 +14,7 @@ import {
 import { DEFAULT_PLUGIN_OPTIONS } from "./src/common/constant";
 import { PluginOptions } from "./src/types";
 import { APIMonitorMongooseClient } from "./src/clients/mongoClient";
+import { systemMetrics } from "./src/services/systemMetrics.service";
 
 class APIMonitorPlugin {
   options: PluginOptions;
@@ -52,6 +53,10 @@ class APIMonitorPlugin {
       serviceInstance.setupHooks(fastify);
 
       RequestLogQueue.getInstance()!.init(this.options);
+      
+      if(!this.options.lambdaEnv) {
+        systemMetrics.startMonitoring()
+      }
     } catch (err) {
       logger.error(
         `APIMonitorPlugin : initServices failed: ${JSON.stringify(err)}`
