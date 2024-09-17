@@ -5,8 +5,10 @@ import {
   BASE_URL_SAAS,
   USER_ACCOUNT_INFO_ENDPOINT,
   DEFAULT_MONGO_URL,
+  ENV_TYPE,
 } from "../common/constant";
 import { logger } from "../common/services";
+import { SystemMetrics } from "./systemMetrics.service";
 
 export class UserAccountService {
   private static instance: UserAccountService | null = null;
@@ -55,7 +57,7 @@ export class UserAccountService {
     UserAccountService.serviceKey = data.serviceApiKey;
   }
 
-  async setupUserAccountInfo({ envType, accountInfo, serviceApiKey }) {
+  async setupUserAccountInfo({ envType, accountInfo, serviceApiKey, provider }) {
     let serviceInfo: any;
     if (
       accountInfo &&
@@ -115,6 +117,14 @@ export class UserAccountService {
         UserAccountService.getAccountInfo()
       )}`
     );
+          
+    if(envType !== ENV_TYPE.SERVERLESS) {
+      if(!provider) {
+        throw new Error('Provider was not provided in plugin options.')
+      }
+      new SystemMetrics().startMonitoring(provider)
+    }
+    
   }
 
   async createUserAccount(

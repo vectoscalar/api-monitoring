@@ -1,5 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { EC2RequestProcessorService } from "./";
+import { axiosClient } from "../common/services";
+import { EC2_METADATA_URL } from "../common/constant";
 
 export class EC2Service {
   reqProcessorInstance: EC2RequestProcessorService | null;

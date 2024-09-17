@@ -22,6 +22,7 @@ class APIMonitorPlugin {
     this.options = {
       ...options,
       lambdaEnv: options.lambdaEnv ?? false,
+      provider: options.provider,
       queueOptions: {
         ...DEFAULT_PLUGIN_OPTIONS.queueOptions,
       },
@@ -33,7 +34,7 @@ class APIMonitorPlugin {
     try {
       logger.init(this.options.logLevel);
 
-      const { serviceApiKey, accountInfo, lambdaEnv } = this.options;
+      const { serviceApiKey, accountInfo, lambdaEnv, provider } = this.options;
 
       await APIMonitorMongooseClient.initConnection({
         serviceApiKey,
@@ -44,6 +45,7 @@ class APIMonitorPlugin {
         envType: lambdaEnv ? ENV_TYPE.SERVERLESS:ENV_TYPE.SERVER,
         serviceApiKey,
         accountInfo,
+        provider
       });
 
       const serviceInstance = lambdaEnv

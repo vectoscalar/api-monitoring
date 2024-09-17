@@ -15,6 +15,7 @@ export interface PluginOptions {
   serviceApiKey?: string;
   queueOptions?: Partial<Queue.QueueOptions<any, any>>;
   lambdaEnv?: boolean;
+  provider?: "LOCAL"| "AWS";
 }
 
 export type RequestLog = {

@@ -4,7 +4,6 @@ import axios, {
   AxiosResponse,
   AxiosError,
 } from "axios";
-import { logger } from ".";
 
 class AxiosService {
   private service: AxiosInstance;
@@ -22,7 +21,6 @@ class AxiosService {
   private handleError = (
     error: AxiosError
   ): AxiosError | Promise<AxiosError> => {
-    logger.error("handleError", error);
     return Promise.reject(error);
   };
 
@@ -32,7 +30,6 @@ class AxiosService {
     params?: Record<string, any>,
     auth?: AxiosRequestConfig["auth"]
   ): Promise<AxiosResponse> {
-    logger.trace(`Will invoke url ${url}`);
     return this.service.request({
       method: "GET",
       url,
@@ -68,9 +65,6 @@ class AxiosService {
     params: Record<string, any> | null = null,
     auth: AxiosRequestConfig["auth"] | undefined = undefined
   ): Promise<AxiosResponse> {
-    logger.trace(
-      `Will invoke url ${url} , Payload: ${JSON.stringify(payload)}`
-    );
     return this.service.request({
       method: "POST",
       url,
