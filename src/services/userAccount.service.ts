@@ -5,8 +5,10 @@ import {
   BASE_URL_SAAS,
   USER_ACCOUNT_INFO_ENDPOINT,
   DEFAULT_MONGO_URL,
+  ENV_TYPE,
 } from "../common/constant";
 import { logger } from "../common/services";
+import { SystemMetrics } from "./systemMetrics.service";
 
 export class UserAccountService {
   private static instance: UserAccountService | null = null;
@@ -115,6 +117,11 @@ export class UserAccountService {
         UserAccountService.getAccountInfo()
       )}`
     );
+          
+    if(envType !== ENV_TYPE.SERVERLESS) {
+      new SystemMetrics().startMonitoring()
+    }
+    
   }
 
   async createUserAccount(
