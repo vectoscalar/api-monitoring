@@ -35,30 +35,51 @@ export class LambdaRequestProcessorService extends RequestProcessorService {
     }
   }
 
-  async onSendHandler(request: any, reply: any, payload: any) {
+  async onSendHandler(request: any, reply: any, payload: any, done) {
     try {
-      logger.trace("LambdaRequestProcessorService -> onSendHandler");
+      const requestId = request.awsLambda.event.requestContext.requestId;
 
-      const requestId = request.awsLambda.event.requestContext.awsRequestId;
+      logger.trace(
+        `LambdaRequestProcessorService -> onSendHandler requestId:: ${requestId}`
+      );
 
       const startTime = new Date(
         request.awsLambda.event.requestContext.timeEpoch
       );
 
-      this.requestData.set(requestId, { requestId, startTime });
+      const requestData = this.requestData.get(requestId);
+
+      if (requestData) {
+        logger.trace(
+          `LambdaRequestProcessorService -> onSendHandler invoked again found request data `
+        );
+        return;
+      }
+
+      this.requestData.set(requestId, { requestId, startTime, payload });
 
       const logObj = this.getTransformedRequestLog(request, reply, "LAMBDA");
 
+      logger.trace(
+        `LambdaRequestProcessorService -> onSendHandler requestId:: ${requestId} -> logObj:: ${JSON.stringify(
+          logObj
+        )}`
+      );
+
       await this.apiLogService.saveRequestLog(logObj);
 
-      this.requestData.delete(requestId);
-      logger.trace("LambdaRequestProcessorService -> onSendHandler completed");
+      this.requestData.set(requestId, {});
+      logger.trace(
+        `LambdaRequestProcessorService -> onSendHandler completed requestId:: ${requestId}`
+      );
+      done(null, payload);
     } catch (err) {
       logger.error(
         `LambdaRequestProcessorService -> onSendHandler error: ${JSON.stringify(
           err
         )}`
       );
+      done(err);
     }
   }
 }

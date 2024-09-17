@@ -151,7 +151,7 @@ export class ApiLogService {
       // console.log("savelog:: endpoint model", this.endpointDAO.model);
       // await this.endpointDAO.create(record);
 
-      const endpointResp = await this.endpointDAO.upsert(
+      let endpointResp = await this.endpointDAO.updateOne(
         {
           url: record.routerUrl || record.url,
           microserviceId: record.microserviceId,
@@ -162,7 +162,7 @@ export class ApiLogService {
             totalResponseTime: record.responseTime,
             totalInvocationCount: 1,
           },
-          $setOnInsert: {
+          $setonInsert: {
             url: record.routerUrl || record.url,
             microserviceId: record.microserviceId,
             method: record.method,
@@ -171,20 +171,37 @@ export class ApiLogService {
         },
         {
           upsert: true,
-          new: true,
           projection: { __v: 0 },
-          setDefaultsOnInsert: true,
         }
       );
 
-      const modifiedRecord = { endpointId: endpointResp._id, ...record };
+      if (!endpointResp.upsertedId) {
+        endpointResp = await this.endpointDAO.findOne({
+          url: record.routerUrl || record.url,
+          microserviceId: record.microserviceId,
+          method: record.method,
+        });
+      }
 
-      logger.trace("APILog service  endpoint dao", endpointResp._id);
+      if (record.reqContext?.envType === "LAMBDA") {
+        logger.trace("saveRequestlog :: context lambda");
+        record.endTime = new Date().toISOString();
+
+        record.responseTime =
+          new Date(record.endTime).getTime() -
+          new Date(record.startTime).getTime();
+      }
+      const modifiedRecord = {
+        endpointId: endpointResp.upsertedId || endpointResp._id,
+        ...record,
+      };
+
+      logger.trace("ApiLogService:: modified record: ", modifiedRecord);
 
       const apiLogResp = await this.apiLogDAO.create(modifiedRecord);
 
       logger.info(
-        `RequestLogManager -> saveRequestLog: api log saved: ${apiLogResp._id}`
+        `ApiLogService -> saveRequestLog: log saved with id: ${apiLogResp._id}`
       );
     } catch (err: any) {
       logger.error(

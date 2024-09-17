@@ -15,7 +15,8 @@ export class MicroserviceDAO extends BaseDAO {
 
   async upsertMicroservice(
     projectId: mongoose.Types.ObjectId,
-    name: string
+    name: string,
+    envType: string
   ): Promise<IMicroservice | null> {
     const existingMicroservice = await this.findOne({ projectId, name });
 
@@ -26,6 +27,7 @@ export class MicroserviceDAO extends BaseDAO {
         projectId,
         name,
         apiKey: new mongoose.Types.ObjectId(),
+        envType,
       });
 
       return newMicroservice;

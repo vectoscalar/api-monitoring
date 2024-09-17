@@ -56,6 +56,9 @@ abstract class BaseDAO {
       })
       .exec();
   }
+  async updateOne(filter, update, options = {}) {
+    return this.model.updateOne(filter, update, options);
+  }
 
   async delete(id: string) {
     await this.model.findByIdAndDelete(id).exec();

@@ -30,4 +30,7 @@ export type RequestLog = {
   isSuccessfull: boolean;
   errorMessage?: string;
   responseTime: number;
+  startTime: string;
+  endTime: string;
+  reqContext: any;
 };

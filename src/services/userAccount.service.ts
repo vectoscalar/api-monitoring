@@ -55,7 +55,7 @@ export class UserAccountService {
     UserAccountService.serviceKey = data.serviceApiKey;
   }
 
-  async setupUserAccountInfo({ accountInfo, serviceApiKey }) {
+  async setupUserAccountInfo({ envType, accountInfo, serviceApiKey }) {
     let serviceInfo: any;
     if (
       accountInfo &&
@@ -66,7 +66,8 @@ export class UserAccountService {
       serviceInfo = await this.createUserAccount(
         accountInfo.organizationName,
         accountInfo.projectName,
-        accountInfo.microserviceName
+        accountInfo.microserviceName,
+        envType
       );
     } else if (serviceApiKey) {
       //NOTE for Internal use only remove this  for external use
@@ -75,6 +76,20 @@ export class UserAccountService {
           serviceApiKey
         );
 
+      if (microServiceInfo[0] && !microServiceInfo[0].envType) {
+        //update enev for microservice
+        logger.info(
+          `microservice exist by service api key: ${serviceApiKey} but environment not found`
+        );
+
+        await this.microserviceDAO.update(microServiceInfo[0]._id, {
+          envType,
+        });
+
+        logger.info(
+          `for microservice: ${serviceApiKey} envType: ${envType} updated`
+        );
+      }
       serviceInfo = microServiceInfo[0] || {};
     }
     const { organizationId, projectId, microserviceId } = serviceInfo;
@@ -105,7 +120,8 @@ export class UserAccountService {
   async createUserAccount(
     organizationName: string,
     projectName: string,
-    microserviceName: string
+    microserviceName: string,
+    envType: string
   ) {
     const org: any = await this.organizationDAO.upsertOrganization(
       organizationName
@@ -120,7 +136,8 @@ export class UserAccountService {
 
     const microservice: any = await this.microserviceDAO.upsertMicroservice(
       project.id,
-      microserviceName
+      microserviceName,
+      envType
     );
     logger.trace("Microservice created ", microservice);
 

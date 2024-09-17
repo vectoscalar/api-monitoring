@@ -37,7 +37,7 @@ export abstract class RequestProcessorService {
     }
   }
 
-  async onSendHandler(request: any, reply: any, payload: any) {
+  async onSendHandler(request: any, reply: any, payload: any, done = null) {
     let requestDataObj = this.requestData.get(request.apiMonitoringId);
     requestDataObj = { ...requestDataObj, payload };
     this.requestData.set(request.apiMonitoringId, requestDataObj);
@@ -52,7 +52,7 @@ export abstract class RequestProcessorService {
   ) {
     const requestId =
       envType === "LAMBDA"
-        ? request.awsLambda.event.requestContext.awsRequestId
+        ? request.awsLambda.event.requestContext.requestId
         : request.apiMonitoringId;
 
     const requestDataObj = this.requestData.get(requestId);
@@ -67,15 +67,6 @@ export abstract class RequestProcessorService {
         `RequestProcessorService::getTransformedRequestLog :: Request data missing for  ID: ${request.apiMonitoringId}] Request for ${request.method} ${request.url}`
       );
     }
-
-    const { startTime } = requestDataObj;
-
-    const endTime =
-      envType === "LAMBDA"
-        ? new Date()
-        : new Date(startTime.getTime() + reply.elapsedTime);
-
-    const elapsedTime = endTime.getTime() - startTime.getTime();
 
     const headersSize = Buffer.byteLength(
       JSON.stringify(request.headers),
@@ -103,6 +94,12 @@ export abstract class RequestProcessorService {
         })
       : null;
 
+    const { startTime } = requestDataObj;
+
+    const endTime = new Date(startTime.getTime() + reply.elapsedTime);
+
+    const elapsedTime = endTime.getTime() - startTime.getTime();
+
     const logObj = {
       url: request.url,
       routerUrl: request.routerPath,
@@ -114,13 +111,15 @@ export abstract class RequestProcessorService {
       isSuccessfull,
       responseTime: elapsedTime,
       ipAddress: request.ip,
-      startTime,
-      endTime,
-      elapsedTime,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
       requestHeaderSize: headersSize,
       requestBodySize,
       responseSize,
       errorDetails,
+      reqContext: {
+        envType,
+      },
     };
 
     logger.trace(

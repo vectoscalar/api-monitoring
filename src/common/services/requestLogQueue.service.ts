@@ -1,5 +1,4 @@
 import Queue from "better-queue";
-import { requestLogSchema } from "../../joi-schema";
 import { logger, axiosClient } from "../services";
 import { ApiLogService } from "../../services/apiLog.service";
 import { RequestLog } from "../../types";
@@ -38,24 +37,6 @@ export class RequestLogQueue {
     );
   }
 
-  // check if the Request Log is valid before pushing in queue
-  static validateRequestLog(requestLog: RequestLog, cb: Function) {
-    const validationResult = requestLogSchema.validate(requestLog);
-
-    if (validationResult.error) {
-      const errorMsg = `RequestLogManager -> validation failed for log: ${JSON.stringify(
-        requestLog
-      )},
-      Error:${validationResult.error.message}`;
-
-      logger.error(errorMsg);
-
-      return cb(errorMsg);
-    }
-
-    return cb(null, requestLog);
-  }
-
   addRequestLog(requestLog: RequestLog) {
     this.requestLogQueue?.push(requestLog);
 
@@ -64,6 +45,5 @@ export class RequestLogQueue {
         requestLog
       )}`
     );
-    console.log("queue stats", this.requestLogQueue?.getStats());
   }
 }

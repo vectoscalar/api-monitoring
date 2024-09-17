@@ -19,3 +19,8 @@ export const DEFAULT_PLUGIN_OPTIONS = {
 
 export const DEFAULT_MONGO_URL =
   "mongodb+srv://ss:ss786@cluster0.hjv8pvk.mongodb.net/new-db?retryWrites=true&w=majority&appName=Cluster0";
+
+export const ENV_TYPE = {
+  SERVER: "SERVER",
+  SERVERLESS: "SERVERLESS",
+};

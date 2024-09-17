@@ -8,13 +8,8 @@ export class LambdaService {
   }
 
   setupHooks(fastifyInstance: FastifyInstance) {
-    fastifyInstance.addHook(
-      "onSend",
-      async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
-        await this.reqProcessorInstance!.onSendHandler(request, reply, payload);
-        console.log("onSend hook completed");
-        return payload;
-      }
-    );
+    fastifyInstance.addHook("onSend", (request, reply, payload, done) => {
+      this.reqProcessorInstance.onSendHandler(request, reply, payload, done);
+    });
   }
 }

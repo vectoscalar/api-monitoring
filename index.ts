@@ -11,7 +11,7 @@ import {
   EC2Service,
 } from "./src/services";
 
-import { DEFAULT_PLUGIN_OPTIONS } from "./src/common/constant";
+import { DEFAULT_PLUGIN_OPTIONS ,ENV_TYPE } from "./src/common/constant";
 import { PluginOptions } from "./src/types";
 import { APIMonitorMongooseClient } from "./src/clients/mongoClient";
 
@@ -41,6 +41,7 @@ class APIMonitorPlugin {
       });
 
       UserAccountService.getInstance()!.setupUserAccountInfo({
+        envType: lambdaEnv ? ENV_TYPE.SERVERLESS:ENV_TYPE.SERVER,
         serviceApiKey,
         accountInfo,
       });
