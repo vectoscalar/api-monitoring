@@ -83,10 +83,10 @@ export class SystemMetrics {
   }
 
   async diskUsage() {
-    const drives = os.platform() === 'win32' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(d => d + ':\\') : ['/'];
-
     const results: any = [];
     const osPlatform = os.platform();
+
+    let drives = ['/'];
 
     /** Ensuring the PowerShell path is included in the environment’s PATH variable for windows. */
     if (osPlatform === 'win32') {
@@ -94,6 +94,11 @@ export class SystemMetrics {
       if (!process.env.PATH?.includes(powershellPath)) {
         process.env.PATH = `${process.env.PATH};${powershellPath}`;
       }
+
+      const output = execSync('wmic logicaldisk get name').toString();
+      drives = output.split('\n')
+        .filter(line => line.trim() && line.includes(':'))
+        .map(line => line.trim());
     }
 
     for (const drive of drives) {
@@ -145,15 +150,18 @@ export class SystemMetrics {
     return results;
   }
 
-  async startMonitoring() {
-    const isEc2Res: any = await this.isEC2();
-    const provider = isEc2Res ? 'aws' : 'local';
+  async startMonitoring(provider) {
     let machineId: string;
 
-    if (provider === 'local') {
+    if (provider === 'LOCAL') {
       machineId = os.hostname() + os.platform() + os.arch();
     } else {
-      machineId = isEc2Res[0];
+      const ec2Metadata: any = await this.fetchEC2Metadata();
+      if (!ec2Metadata) {
+        throw new Error('Could not fetch EC2 metadata.')
+      }
+
+      machineId = ec2Metadata[0];
     }
 
     const { organizationId, projectId, microserviceId, serviceKey } = UserAccountService.getAccountInfo();
@@ -200,7 +208,8 @@ export class SystemMetrics {
     }
   }
 
-  async isEC2(retries = 3) {
+  async fetchEC2Metadata() {
+    const retries = 3
     for (let i = 0; i < retries; i++) {
       try {
         const response = await axiosClient.get(EC2_METADATA_URL, { timeout: '1000' });

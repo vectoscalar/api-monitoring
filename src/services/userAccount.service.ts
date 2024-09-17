@@ -57,7 +57,7 @@ export class UserAccountService {
     UserAccountService.serviceKey = data.serviceApiKey;
   }
 
-  async setupUserAccountInfo({ envType, accountInfo, serviceApiKey }) {
+  async setupUserAccountInfo({ envType, accountInfo, serviceApiKey, provider }) {
     let serviceInfo: any;
     if (
       accountInfo &&
@@ -119,7 +119,10 @@ export class UserAccountService {
     );
           
     if(envType !== ENV_TYPE.SERVERLESS) {
-      new SystemMetrics().startMonitoring()
+      if(!provider) {
+        throw new Error('Provider was not provided in plugin options.')
+      }
+      new SystemMetrics().startMonitoring(provider)
     }
     
   }
