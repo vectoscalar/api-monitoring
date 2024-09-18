@@ -5,8 +5,8 @@ import { BASE_URL_SAAS, ORGANIZATIONS_ROUTE, PROJECTS_ROUTE, ENDPOINT_LOGS_ROUTE
 import { UserAccountService } from "./userAccount.service";
 import { SystemMetricsDAO, InstanceDAO } from "../dao";
 
-const os = require('os');
-const checkDiskSpace = require('check-disk-space').default;
+import os from 'os';
+import checkDiskSpace from 'check-disk-space';
 
 
 export class SystemMetrics {
