@@ -156,12 +156,12 @@ export class SystemMetrics {
     if (provider === 'LOCAL') {
       machineId = os.hostname() + os.platform() + os.arch();
     } else {
-      const ec2Metadata: any = await this.fetchEC2Metadata();
-      if (!ec2Metadata) {
-        throw new Error('Could not fetch EC2 metadata.')
-      }
+      // const ec2Metadata: any = await this.fetchEC2Metadata();
+      // if (!ec2Metadata) {
+      //   throw new Error('Could not fetch EC2 metadata.')
+      // }
 
-      machineId = ec2Metadata[0];
+      machineId = 'instanceId';
     }
 
     const { organizationId, projectId, microserviceId, serviceKey } = UserAccountService.getAccountInfo();

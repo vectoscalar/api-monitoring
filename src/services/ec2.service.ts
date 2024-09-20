@@ -26,8 +26,9 @@ export class EC2Service {
 
     fastifyInstance.addHook(
       "onSend",
-      async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
-        await this.reqProcessorInstance!.onSendHandler(request, reply, payload);
+      (request: FastifyRequest, reply: FastifyReply, payload: any, done) => {
+        this.reqProcessorInstance!.onSendHandler(request, reply, payload);
+        done(null, payload)
       }
     );
   }

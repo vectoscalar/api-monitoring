@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import requestIp from 'request-ip';
 import { logger } from "./";
 import { UserAccountService } from "../../services/userAccount.service";
 
@@ -110,7 +111,7 @@ export abstract class RequestProcessorService {
       microserviceId: accountInfo.microserviceId,
       isSuccessfull,
       responseTime: elapsedTime,
-      ipAddress: request.ip,
+      ipAddress: requestIp.getClientIp(request),
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
       requestHeaderSize: headersSize,
