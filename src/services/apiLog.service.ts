@@ -162,7 +162,7 @@ export class ApiLogService {
             totalResponseTime: record.responseTime,
             totalInvocationCount: 1,
           },
-          $setonInsert: {
+          $set: {
             url: record.routerUrl || record.url,
             microserviceId: record.microserviceId,
             method: record.method,
