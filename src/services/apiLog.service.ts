@@ -360,7 +360,6 @@ export class ApiLogService {
  * Example: [{ microserviceId: '1', hostName: 'a' }, { microserviceId: '2', hostName: 'b' }, { microserviceId: '1', hostName: 'a' }]
  */
   async updateHostNames(batch) {
-    // Grouping hostNames by microserviceId
     const groupedByService = batch.reduce((acc, { microserviceId, hostname }) => {
       if (!acc[microserviceId]) {
         acc[microserviceId] = new Set();
