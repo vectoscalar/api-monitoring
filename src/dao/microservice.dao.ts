@@ -13,6 +13,10 @@ export class MicroserviceDAO extends BaseDAO {
     this.model = APIMonitorMongooseClient.models.MicroserviceModel;
   }
 
+  async bulkWrite(operations: any): Promise<any> {
+    return this.model.collection.bulkWrite(operations);
+  }
+
   async upsertMicroservice(
     projectId: mongoose.Types.ObjectId,
     name: string,
