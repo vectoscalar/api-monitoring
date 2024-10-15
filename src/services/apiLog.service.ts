@@ -8,16 +8,17 @@ import {
   InvocationFilter,
   RequestLog,
 } from "../types/index";
+import { MicroServiceService } from "./microService.service";
 
 export class ApiLogService {
   private apiLogDAO: APILogDAO;
   private endpointDAO: EndpointDAO;
-  private microserviceDAO: MicroserviceDAO;
+  private microserviceService: MicroServiceService
 
   constructor() {
     this.apiLogDAO = new APILogDAO();
     this.endpointDAO = new EndpointDAO();
-    this.microserviceDAO = new MicroserviceDAO();
+    this.microserviceService = new MicroServiceService()
   }
 
   async getLatestInvocations(
@@ -200,8 +201,10 @@ export class ApiLogService {
 
       logger.trace("ApiLogService:: modified record: ", modifiedRecord);
 
-      await this.updateHostNames([record]);
-      const apiLogResp = await this.apiLogDAO.create(modifiedRecord);
+      const [, apiLogResp] = await Promise.all([
+        this.microserviceService.updateHostNames([record]),
+        this.apiLogDAO.create(modifiedRecord)
+      ]);
 
       logger.info(
         `ApiLogService -> saveRequestLog: log saved with id: ${apiLogResp._id}`
@@ -331,8 +334,10 @@ export class ApiLogService {
             )}`
           );
 
-          await this.updateHostNames(batch);
-          await this.apiLogDAO.insertMany(apiLogList);
+          await Promise.all([
+            this.microserviceService.updateHostNames(batch),
+            this.apiLogDAO.insertMany(apiLogList)
+          ]);
 
           logger.trace("successfully inserted batch", apiLogList);
           cb(null, batch);
@@ -353,35 +358,5 @@ export class ApiLogService {
   }
 
 
-/**
- * Method to handle batch processing and update hostnames in microservices table.
- * 
- * @param {Array} batch - An array of objects with microserviceId and hostName
- * Example: [{ microserviceId: '1', hostName: 'a' }, { microserviceId: '2', hostName: 'b' }, { microserviceId: '1', hostName: 'a' }]
- */
-  async updateHostNames(batch) {
-    const groupedByService = batch.reduce((acc, { microserviceId, hostname }) => {
-      if (!acc[microserviceId]) {
-        acc[microserviceId] = new Set();
-      }
-      acc[microserviceId].add(hostname);
-      return acc;
-    }, {});
 
-    logger.info("RequestLogManager -> updateHostNames: Hostnames Grouped By Service", groupedByService)
-
-    const bulkOps = Object.entries(groupedByService).map(([microserviceId, hostnamesSet]: any) => ({
-      updateOne: {
-        filter: { _id: new mongoose.Types.ObjectId(String(microserviceId)) },
-        update: { $addToSet: { hostNames: { $each: [...hostnamesSet] } } }, // Use $each to add multiple hostNames, no duplicates
-      }
-    }));
-
-    try {
-      const result = await this.microserviceDAO.bulkWrite(bulkOps);
-      logger.info('RequestLogManager -> updateHostNames: Bulk update successful:', result);
-    } catch (error) {
-      logger.error('Error performing bulk update:', error);
-    }
-  };
 }
