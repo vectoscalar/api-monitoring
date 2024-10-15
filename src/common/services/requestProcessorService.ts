@@ -118,6 +118,7 @@ export abstract class RequestProcessorService {
       requestBodySize,
       responseSize,
       errorDetails,
+      hostname: request.hostname,
       reqContext: {
         envType,
       },
