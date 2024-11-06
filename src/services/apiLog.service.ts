@@ -273,6 +273,7 @@ export class ApiLogService {
 
       await session.withTransaction(async () => {
         try {
+          //Step 1 : update endpoints table, inc invocationCount of all invocked apis, and execution time
           const endpointResp = await Promise.all(
             endpointRecords.map(async (record) =>
               this.endpointDAO.upsert(

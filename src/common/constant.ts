@@ -8,9 +8,9 @@ export const ENDPOINT_LOGS_ROUTE = "/endpoint-logs";
 export const DEFAULT_PLUGIN_OPTIONS = {
   lambdaEnv: false,
   queueOptions: {
-    batchSize: 2,
+    maxQueueSize: 2,
     batchDelay: 0,
-    batchDelayTimeout: 10000,
+    delayTimeout: 10000,    //timeout
   },
   logLevel: "error",
   accountInfo: undefined,

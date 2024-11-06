@@ -7,6 +7,7 @@ import {
   BASE_URL_SAAS,
   USER_ACCOUNT_INFO_ENDPOINT,
 } from "../common/constant";
+import { UserAccountService } from "../services";
 
 export namespace APIMonitorMongooseClient {
   export let connection: mongoose.Connection | null = null;
@@ -32,23 +33,23 @@ export namespace APIMonitorMongooseClient {
       }
 
       // NOTE::instead of making network call initializing the mongo url  to save network cost comment. remove  this condition for external use
-      if (serviceApiKey) mongoUrl = DEFAULT_MONGO_URL;
-      // else if (serviceApiKey) {
-      //   // fetching mongo url from monitor tool saas endpoint
-      //   const {
-      //     organizationId,
-      //     projectId,
-      //     microserviceId,
-      //     mongoUrl: userMongoURL,
-      //   } = await getServiceDetailsByKey(serviceApiKey);
-      //   mongoUrl = userMongoURL || DEFAULT_MONGO_URL;
-      //   UserAccountService.setAccountInfo({
-      //     organizationId,
-      //     projectId,
-      //     microserviceId,
-      //     serviceApiKey,
-      //   });
-      // }
+      // if (serviceApiKey) mongoUrl = DEFAULT_MONGO_URL;
+      if (serviceApiKey) {
+        // fetching mongo url from monitor tool saas endpoint
+        const {
+          organizationId,
+          projectId,
+          microserviceId,
+          mongoUrl: userMongoURL,
+        } = await getServiceDetailsByKey(serviceApiKey);
+        mongoUrl = userMongoURL;
+        UserAccountService.setAccountInfo({
+          organizationId,
+          projectId,
+          microserviceId,
+          serviceApiKey,
+        });
+      }
       else if (accountInfo.mongoUrl) {
         // initialing mongo url provided by user
         mongoUrl = accountInfo.mongoUrl;
