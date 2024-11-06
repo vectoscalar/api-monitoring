@@ -212,7 +212,11 @@ export class SystemMetrics {
     const retries = 3
     for (let i = 0; i < retries; i++) {
       try {
-        const response = await axiosClient.get(EC2_METADATA_URL, { timeout: '1000' });
+        // const response = await axiosClient.get(EC2_METADATA_URL, { timeout: '1000' });
+        const headers = {
+          'Metadata-Flavor': 'Amazon' // Required by some versions of EC2 metadata service
+        }
+        const response = await axiosClient.get(EC2_METADATA_URL, headers ,{ timeout: '1000'});
         if (response.status === 200) {
           return [response];
         }

@@ -13,6 +13,10 @@ export class MicroserviceDAO extends BaseDAO {
     this.model = APIMonitorMongooseClient.models.MicroserviceModel;
   }
 
+  async updateOne(operations: any): Promise<any> {
+    return this.model.collection.updateOne(operations.filter, operations.update);
+  }
+
   async upsertMicroservice(
     projectId: mongoose.Types.ObjectId,
     name: string,

@@ -1,21 +1,24 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { APIMonitorMongooseClient } from "../../src/clients/mongoClient";
 import { logger } from "../common/services";
-import { APILogDAO, EndpointDAO } from "../dao";
+import { APILogDAO, EndpointDAO, MicroserviceDAO } from "../dao";
 
 import {
   AvergaResponseFilter,
   InvocationFilter,
   RequestLog,
 } from "../types/index";
+import { MicroServiceService } from "./microService.service";
 
 export class ApiLogService {
   private apiLogDAO: APILogDAO;
   private endpointDAO: EndpointDAO;
+  private microserviceService: MicroServiceService
 
   constructor() {
     this.apiLogDAO = new APILogDAO();
     this.endpointDAO = new EndpointDAO();
+    this.microserviceService = new MicroServiceService()
   }
 
   async getLatestInvocations(
@@ -198,7 +201,10 @@ export class ApiLogService {
 
       logger.trace("ApiLogService:: modified record: ", modifiedRecord);
 
-      const apiLogResp = await this.apiLogDAO.create(modifiedRecord);
+      const [, apiLogResp] = await Promise.all([
+        this.microserviceService.updateHostNames([record]),
+        this.apiLogDAO.create(modifiedRecord)
+      ]);
 
       logger.info(
         `ApiLogService -> saveRequestLog: log saved with id: ${apiLogResp._id}`
@@ -328,7 +334,10 @@ export class ApiLogService {
             )}`
           );
 
-          await this.apiLogDAO.insertMany(apiLogList);
+          await Promise.all([
+            this.microserviceService.updateHostNames(batch),
+            this.apiLogDAO.insertMany(apiLogList)
+          ]);
 
           logger.trace("successfully inserted batch", apiLogList);
           cb(null, batch);
@@ -347,4 +356,7 @@ export class ApiLogService {
       // await session.endSession();
     }
   }
+
+
+
 }
