@@ -16,8 +16,8 @@
     }
   },
   "scripts": {
-    "build": "tsc && tsc-alias -p tsconfig.json",
-    "postbuild": "esm2cjs --in dist/esm --out dist/cjs -l error && npm run bundle",
+    "build": "npm run bundle",
+    "types": "tsc -p tsconfig.types.json",
     "bundle": "npm run bundle:cjs && npm run bundle:esm",
     "bundle:cjs": "webpack --config webpack.config.js",
     "bundle:esm": "webpack --config webpack.esm.config.js",
